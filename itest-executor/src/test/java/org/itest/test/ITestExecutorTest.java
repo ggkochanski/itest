@@ -32,7 +32,7 @@ import org.itest.test.example.SimpleExample;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class ITestPathExecutorTest {
+public class ITestExecutorTest {
     ITestExecutor executor = ITestExecutorUtil.buildExecutor(new ITestConfigImpl());
 
     @Test
