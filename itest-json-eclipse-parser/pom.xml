@@ -4,18 +4,18 @@
 	<parent>
 		<artifactId>itest</artifactId>
 		<groupId>org.itest</groupId>
-		<version>1.0.0</version>
+		<version>1.0.1-SNAPSHOT</version>
 	</parent>
 	<groupId>org.itest</groupId>
 	<artifactId>itest-json-eclipse-parser</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<name>itest-eclipse-json-parser</name>
 	<url>https://github.com/ggkochanski/itest/</url>
 	<dependencies>
 		<dependency>
 			<groupId>org.itest</groupId>
 			<artifactId>itest-iface</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.eclipsesource.minimal-json</groupId>
