@@ -13,8 +13,14 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<plugins.compiler.version>3.1</plugins.compiler.version>
 	</properties>
 
+	<scm>
+		<connection>scm:git:https://github.com/ggkochanski/itest.git</connection>
+		<developerConnection>scm:git:git@github.com:ggkochanski/itest.git</developerConnection>
+		<url>https://github.com/ggkochanski/itest</url>
+	</scm>
 	<modules>
 		<module>itest-annotation</module>
 		<module>itest-iface</module>
@@ -28,11 +34,18 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.5.1</version>
+				<version>${plugins.compiler.version}</version>
 				<configuration>
-					<source>1.5</source>
-					<target>1.5</target>
+					<source>1.6</source>
+					<target>1.6</target>
 				</configuration>
+			</plugin>
+		</plugins>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.0-beta-9</version>
 			</plugin>
 		</plugins>
 	</build>
