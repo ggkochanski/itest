@@ -25,6 +25,8 @@
  */
 package org.itest.impl;
 
+import java.util.Date;
+
 import org.itest.exception.ITestInitializationException;
 import org.itest.param.ITestValueConverter;
 
@@ -41,6 +43,10 @@ public class ITestValueConverterImpl implements ITestValueConverter {
             res = Integer.valueOf(value);
         } else if ( Long.class == clazz || long.class == clazz ) {
             res = Long.valueOf(value);
+        } else if ( Boolean.class == clazz || boolean.class == clazz ) {
+            res = Boolean.valueOf(value);
+        } else if ( Date.class == clazz ) {
+            res = new Date(Long.valueOf(value));
         } else if ( Class.class == clazz ) {
             try {
                 res = Class.forName(value);

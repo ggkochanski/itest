@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.itest.ITestConstants;
@@ -53,7 +52,7 @@ public class ITestParamMergerImpl implements ITestParamMerger {
         Iterator<ITestParamState> itestParamsIterator = itestParams.iterator();
         for (String transformation : transformations) {
             ITestParamState itestParam = itestParamsIterator.next();
-            ITestStateImpl state = new ITestStateImpl();
+            ITestParamStateImpl state = new ITestParamStateImpl();
             ITestParamState thisState = getState(ITestConstants.THIS, transformation, itestParam);
             ITestParamState argState = getState(ITestConstants.ARG, transformation, itestParam);
             if ( null != thisState ) {
@@ -68,21 +67,21 @@ public class ITestParamMergerImpl implements ITestParamMerger {
     }
 
     private ITestParamState mergeUnified(Collection<ITestParamState> unifiedStates) {
-        ITestStateImpl mergedState = new ITestStateImpl();
+        ITestParamStateImpl mergedState = new ITestParamStateImpl();
         merge(ITestConstants.THIS, mergedState, unifiedStates);
         merge(ITestConstants.ARG, mergedState, unifiedStates);
         return mergedState;
     }
 
-    private void merge(String name, ITestStateImpl parentState, Collection<ITestParamState> unifiedStates) {
-        ITestStateImpl currentState = null;
+    private void merge(String name, ITestParamStateImpl parentState, Collection<ITestParamState> unifiedStates) {
+        ITestParamStateImpl currentState = null;
         Collection<ITestParamState> unifiedElements = new ArrayList<ITestParamState>(unifiedStates.size());
         for (ITestParamState itestState : unifiedStates) {
             unifiedElements.add(null == itestState ? null : itestState.getElement(name));
         }
         Iterable<String> allNamesIterable = getAllNamesInterable(unifiedElements);
         if ( null != allNamesIterable ) {
-            currentState = new ITestStateImpl();
+            currentState = new ITestParamStateImpl();
             currentState.elements = new HashMap<String, ITestParamState>();
             parentState.addElement(name, currentState);
             for (String elementName : allNamesIterable) {
@@ -92,7 +91,7 @@ public class ITestParamMergerImpl implements ITestParamMerger {
             for (ITestParamState itestState : unifiedElements) {
                 if ( null != itestState ) {
                     if ( null == currentState ) {
-                        currentState = new ITestStateImpl();
+                        currentState = new ITestParamStateImpl();
                         parentState.addElement(name, currentState);
                     }
                     currentState.value = itestState.getValue();
@@ -126,12 +125,12 @@ public class ITestParamMergerImpl implements ITestParamMerger {
         StringTokenizer t = new StringTokenizer(transformation.replaceAll(ITestConstants.ASSIGN, "." + ITestConstants.ASSIGN + "."), ".");
         String token = t.nextToken();
         if ( element.equals(token) ) {
-            ITestStateImpl prevState = new ITestStateImpl();
+            ITestParamStateImpl prevState = new ITestParamStateImpl();
             ITestParamState res = prevState;
             String prevToken = null;
             while ( !ITestConstants.ASSIGN.equals(token = t.nextToken())) {
                 if ( null != prevToken ) {
-                    ITestStateImpl p = new ITestStateImpl();
+                    ITestParamStateImpl p = new ITestParamStateImpl();
                     prevState.addElement(prevToken, p);
                     prevState = p;
                 }
@@ -148,49 +147,5 @@ public class ITestParamMergerImpl implements ITestParamMerger {
             return res;
         }
         return null;
-    }
-
-    static class ITestStateImpl implements ITestParamState {
-        private Map<String, ITestParamState> elements;
-
-        private String value;
-
-        @Override
-        public Integer getSizeParam() {
-            return null == elements ? null : elements.size();
-        }
-
-        public void addElement(String token, ITestParamState iTestParamsImpl) {
-            if ( null == elements ) {
-                elements = new HashMap<String, ITestParamState>();
-            }
-            elements.put(token, iTestParamsImpl);
-        }
-
-        @Override
-        public Iterable<String> getNames() {
-            return elements == null ? null : elements.keySet();
-        }
-
-        @Override
-        public ITestParamState getElement(String name) {
-            return elements == null ? null : elements.get(name);
-        }
-
-        @Override
-        public String getValue() {
-            return value;
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder sb = new StringBuilder();
-            if ( null == elements ) {
-                sb.append(":").append(getValue());
-            } else {
-                sb.append(elements);
-            }
-            return sb.toString();
-        }
     }
 }

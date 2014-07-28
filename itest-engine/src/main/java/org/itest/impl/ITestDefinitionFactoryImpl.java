@@ -25,6 +25,8 @@
  */
 package org.itest.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -41,7 +43,9 @@ import org.itest.annotation.ITestInitRef;
 import org.itest.annotation.ITests;
 import org.itest.definition.ITestDefinition;
 import org.itest.definition.ITestDefinitionFactory;
+import org.itest.exception.ITestException;
 import org.itest.exception.ITestParamDefinitionException;
+import org.itest.impl.util.IoUtils;
 import org.itest.param.ITestParamState;
 
 public class ITestDefinitionFactoryImpl implements ITestDefinitionFactory {
@@ -53,6 +57,8 @@ public class ITestDefinitionFactoryImpl implements ITestDefinitionFactory {
     private final Map<ITestIdentifier, ITestDefinition> itestDefinitionMap = new HashMap<ITestIdentifier, ITestDefinition>();
 
     private final ITestConfig iTestConfig;
+
+    private final byte[] buffer = new byte[1024];
 
     public ITestDefinitionFactoryImpl(ITestConfig iTestConfig) {
         this.iTestConfig = iTestConfig;
@@ -72,9 +78,7 @@ public class ITestDefinitionFactoryImpl implements ITestDefinitionFactory {
 
     private void buildDefinition(ITestIdentifier itestIdentifier) {
         Collection<ITestDependency> children = itestDependencyMap.get(itestIdentifier);
-        if ( null == children ) {
-            throw new RuntimeException("Dependency test not found for " + itestIdentifier);
-        } else {
+        if ( null != children ) {
             for (ITestDependency child : itestDependencyMap.get(itestIdentifier)) {
                 buildDefinition(child.itestIdentifier);
             }
@@ -90,7 +94,13 @@ public class ITestDefinitionFactoryImpl implements ITestDefinitionFactory {
             for (ITestDependency child : itestDependencyMap.get(itestIdentifier)) {
                 ITestDefinition childPathDefintion = itestDefinitionMap.get(child.itestIdentifier);
                 transformations.add(child.transformation);
-                params.add(childPathDefintion.getInitParams());
+                ITestParamState childParams;
+                if ( null == childPathDefintion ) {
+                    childParams = loadParams(child.itestIdentifier);
+                } else {
+                    childParams = childPathDefintion.getInitParams();
+                }
+                params.add(childParams);
             }
             if ( 0 < itestDefinition.path.init().length() ) {
                 transformations.add("");
@@ -102,6 +112,26 @@ public class ITestDefinitionFactoryImpl implements ITestDefinitionFactory {
                     itestParams, parseInitParam(itestDefinition.method, itestDefinition.path.verify()), new HashMap<String, Type>(), iTestStaticAssignment);
             itestDefinitionMap.put(itestIdentifier, res);
         }
+    }
+
+    private ITestParamState loadParams(ITestIdentifier itestIdentifier) {
+        StringBuilder sb = new StringBuilder(128);
+        sb.append(itestIdentifier.itestClass.getName().replace('.', '/'));
+        sb.append('.').append(itestIdentifier.itestName).append(".itest");
+        InputStream is = itestIdentifier.itestClass.getClassLoader().getResourceAsStream(sb.toString());
+        if ( null == is ) {
+            throw new ITestException("Failed to load params for: " + itestIdentifier);
+        }
+        String init;
+        try {
+            init = new String(IoUtils.readBytes(is, buffer));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        ITestParamState initParams = parseInitParam(null, init);
+        ITestParamStateImpl res = new ITestParamStateImpl();
+        res.addElement(ITestConstants.THIS, initParams);
+        return res;
     }
 
     private Map<Class<?>, Map<String, String>> toITestStaticAssignment(ITestAssignment[] assignment) {
@@ -132,8 +162,8 @@ public class ITestDefinitionFactoryImpl implements ITestDefinitionFactory {
                         Collection<ITestDependency> col = new ArrayList<ITestDependency>();
                         itestDependencyMap.put(itestIdentifier, col);
                         for (ITestInitRef initRef : path.initRef()) {
-                            Class<?> refClass = resolveDependencyClass(clazz, initRef.use());
-                            String refTestName = StringUtils.substring(initRef.use(), initRef.use().lastIndexOf('.') + 1);
+                            Class<?> refClass = initRef.useClass() == ITestInitRef.class ? clazz : initRef.useClass();
+                            String refTestName = initRef.use();
                             col.add(new ITestDependency(initRef.assign(), new ITestIdentifier(refClass, refTestName)));
                             if ( refClass != clazz ) {
                                 buildDependencies(refClass);

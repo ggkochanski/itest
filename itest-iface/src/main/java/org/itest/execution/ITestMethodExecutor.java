@@ -25,8 +25,10 @@
  */
 package org.itest.execution;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.itest.definition.ITestDefinition;
 
 public interface ITestMethodExecutor {
-    ITestMethodExecutionResult execute(ITestDefinition iTestDefinition);
+    ITestMethodExecutionResult execute(ITestDefinition iTestDefinition) throws InvocationTargetException;
 }

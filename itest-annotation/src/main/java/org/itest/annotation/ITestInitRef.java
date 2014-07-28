@@ -26,6 +26,8 @@
 package org.itest.annotation;
 
 public @interface ITestInitRef {
+    Class<?> useClass() default ITestInitRef.class;
+
     String use();
 
     String assign() default "";

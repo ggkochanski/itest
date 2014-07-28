@@ -43,7 +43,6 @@ import org.itest.ITestContext;
 import org.itest.definition.ITestDefinition;
 import org.itest.exception.ITestException;
 import org.itest.exception.ITestMethodExecutionException;
-import org.itest.exception.ITestTargetInvocationException;
 import org.itest.execution.ITestMethodExecutionResult;
 import org.itest.execution.ITestMethodExecutor;
 import org.itest.param.ITestParamState;
@@ -57,10 +56,13 @@ public class ITestMethodExecutorImpl implements ITestMethodExecutor {
     }
 
     @Override
-    public ITestMethodExecutionResult execute(ITestDefinition itestPathDefinition) {
+    public ITestMethodExecutionResult execute(ITestDefinition itestPathDefinition) throws InvocationTargetException {
         Class<?> clazz = itestPathDefinition.getITestClass();
         Method method = itestPathDefinition.getITestMethod();
         ITestParamState initStateParam = itestPathDefinition.getInitParams().getElement(ITestConstants.THIS);
+        if ( null == initStateParam ) {
+            initStateParam = ITestRandomObjectGeneratorImpl.EMPTY_STATE;
+        }
         Map<String, Type> itestGenericMap = itestPathDefinition.getITestGenericMap();
         Map<Class<?>, Map<String, String>> staticAssignments = itestPathDefinition.getITestStaticAssignments();
         ITestContext iTestContext = new ITestContextImpl(itestPathDefinition.getITestStaticAssignments());
@@ -95,10 +97,7 @@ public class ITestMethodExecutorImpl implements ITestMethodExecutor {
             itestData.R = res;
             return itestData;
         } catch (InvocationTargetException e) {
-            // iTestFieldVerificationResult = Collections.singleton((ITestFieldVerificationResult) new ITestInvocationTargetExecutionFailure(method.getName(),
-            // e));
-            // e.getTargetException();
-            throw new ITestTargetInvocationException(method.getName(), e);
+            throw e;
         } catch (Exception e) {
             throw new ITestMethodExecutionException("Error invoking method:" + method, e);
         }

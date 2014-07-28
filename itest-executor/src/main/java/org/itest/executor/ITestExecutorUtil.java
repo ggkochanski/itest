@@ -25,6 +25,7 @@
  */
 package org.itest.executor;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 
 import org.itest.ITestConfig;
@@ -52,19 +53,27 @@ public class ITestExecutorUtil {
             Collection<ITestDefinition> iTestFlowDefinitions = itestConfig.getITestDefinitionFactory().buildTestFlowDefinitions(classes);
             StringBuilder sb = new StringBuilder();
             for (ITestDefinition iTestPathDefinition : iTestFlowDefinitions) {
-                ITestMethodExecutionResult executionData = itestConfig.getITestMethodExecutor().execute(iTestPathDefinition);
-                Collection<ITestFieldVerificationResult> verificationResult = itestConfig.getITestExecutionVerifier().verify(
-                        iTestPathDefinition.getITestMethod().toString(), executionData, iTestPathDefinition.getVeryficationParams());
-
-                for (ITestFieldVerificationResult res : verificationResult) {
-                    if ( !res.isSuccess() ) {
-                        sb.append(res).append('\n');
+                try {
+                    ITestMethodExecutionResult executionData = itestConfig.getITestMethodExecutor().execute(iTestPathDefinition);
+                    Collection<ITestFieldVerificationResult> verificationResult = itestConfig.getITestExecutionVerifier().verify(
+                            iTestPathDefinition.getITestMethod().toString(), executionData, iTestPathDefinition.getVeryficationParams());
+                    for (ITestFieldVerificationResult res : verificationResult) {
+                        if ( !res.isSuccess() ) {
+                            sb.append(res).append('\n');
+                        }
                     }
+                } catch (InvocationTargetException e) {
+                    sb.append(iTestPathDefinition.getITestMethod().toString()).append(e.getTargetException()).append('\n');
+                    StackTraceElement[] trace = e.getTargetException().getStackTrace();
+                    for (int i = 0; i < trace.length; i++) {
+                        sb.append("\tat ").append(trace[i]).append('\n');
+                    }
+
                 }
+
             }
             return sb.toString();
         }
-
     }
 
 }

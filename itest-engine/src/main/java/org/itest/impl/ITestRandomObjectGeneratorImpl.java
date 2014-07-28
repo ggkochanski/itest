@@ -36,6 +36,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -61,7 +62,13 @@ import org.itest.param.ITestParamState;
 public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
     private static final int MAX_DEPTH = 20;
 
-    private static Random random = new Random();
+    public static final ITestParamState EMPTY_STATE = new ITestParamStateImpl() {
+        {
+            elements = Collections.EMPTY_MAP;
+        }
+    };
+
+    private static final Random random = new Random();
 
     private static int RANDOM_MAX = 5;
 
@@ -145,7 +152,7 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
         Object[] constructorArgs = new Object[constructorTypes.length];
         for (int i = 0; i < constructorTypes.length; i++) {
             Type pt = getTypeProxy(constructorTypes[i], map);
-            constructorArgs[i] = generateRandom(pt, null, Collections.EMPTY_MAP, iTestContext);
+            constructorArgs[i] = generateRandom(pt, EMPTY_STATE, Collections.EMPTY_MAP, iTestContext);
         }
         try {
             res = c.newInstance(constructorArgs);
@@ -190,6 +197,8 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             Class<?> clazz;
             if ( type instanceof Class<?> ) {
                 clazz = (Class<?>) type;
+            } else if ( type instanceof WildcardType ) {
+                throw new ITestException("Wildcard type (" + type + ") not supported");
             } else {
                 clazz = (Class<?>) ((ParameterizedType) type).getRawType();
             }
@@ -246,9 +255,9 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                 Object res = methodResults.get(methodSignature(method));
-                if ( res == null ) {
-                    throw new NullPointerException();
-                }
+                // if ( res == null ) {
+                // throw new NullPointerException();
+                // }
                 return res;
             }
         });

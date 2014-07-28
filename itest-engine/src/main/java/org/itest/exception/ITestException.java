@@ -30,7 +30,7 @@ public class ITestException extends RuntimeException {
 
     StringBuilder message;
 
-    public ITestException(String message, Exception e) {
+    public ITestException(String message, Throwable e) {
         super(e);
         this.message = new StringBuilder();
         this.message.append(" ").append(message);
