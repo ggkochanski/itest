@@ -245,7 +245,7 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
         return (T) res;
     }
 
-    private Object newDynamicProxy(Type type, final ITestParamState iTestState, final Map<String, Type> itestGenericMap, final ITestContext iTestContext) {
+    protected Object newDynamicProxy(Type type, final ITestParamState iTestState, final Map<String, Type> itestGenericMap, final ITestContext iTestContext) {
         Class<?> clazz = getRawClass(type);
         Map<String, Type> map = new HashMap<String, Type>();
         final Map<String, Object> methodResults = new HashMap<String, Object>();
@@ -254,7 +254,7 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
 
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                Object res = methodResults.get(methodSignature(method));
+                Object res = methodResults.get(methodSignature(method, true));
                 // if ( res == null ) {
                 // throw new NullPointerException();
                 // }
@@ -274,11 +274,15 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
         do {
             for (Method m : t.getDeclaredMethods()) {
                 if ( !Modifier.isStatic(m.getModifiers()) ) {
-                    String mSignature = methodSignature(m);
+                    String mSignature = methodSignature(m, true);
                     try {
                         iTestContext.enter(res, mSignature);
                         Type rType = getTypeProxy(m.getGenericReturnType(), map);
-                        Object o = generateRandom(rType, iTestState == null ? null : iTestState.getElement(mSignature), map, iTestContext);
+                        ITestParamState mITestState = iTestState == null ? null : iTestState.getElement(mSignature);
+                        if ( null == mITestState ) {
+                            mITestState = iTestState == null ? null : iTestState.getElement(methodSignature(m, false));
+                        }
+                        Object o = generateRandom(rType, mITestState, map, iTestContext);
                         methodResults.put(mSignature, o);
                         iTestContext.leave();
                     } catch (ITestException e) {
@@ -324,13 +328,17 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
         return res;
     }
 
-    protected String methodSignature(Method m) {
+    protected String methodSignature(Method m, boolean full) {
         StringBuilder sb = new StringBuilder().append(m.getName()).append("(");
-        for (Class<?> clazz : m.getParameterTypes()) {
-            sb.append(clazz.getName()).append(',');
-        }
-        if ( ',' == sb.charAt(sb.length() - 1) ) {
-            sb.deleteCharAt(sb.length() - 1);
+        if ( full ) {
+            for (Class<?> clazz : m.getParameterTypes()) {
+                sb.append(clazz.getName()).append(',');
+            }
+            if ( ',' == sb.charAt(sb.length() - 1) ) {
+                sb.deleteCharAt(sb.length() - 1);
+            }
+        } else {
+            sb.append('*');
         }
         sb.append(")");
         return sb.toString();
@@ -402,7 +410,7 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
         return res;
     }
 
-    private Object fillMap(Object o, Type type, ITestParamState iTestState, Map<String, Type> map, ITestContext iTestContext) {
+    protected Object fillMap(Object o, Type type, ITestParamState iTestState, Map<String, Type> map, ITestContext iTestContext) {
         Map<Object, Object> m = (Map<Object, Object>) o;
         if ( null == m ) {
             m = new HashMap<Object, Object>();
@@ -426,7 +434,7 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
         return m;
     }
 
-    private Collection<?> fillCollection(Object o, Type type, ITestParamState iTestState, Map<String, Type> map, ITestContext iTestContext) {
+    protected Object fillCollection(Object o, Type type, ITestParamState iTestState, Map<String, Type> map, ITestContext iTestContext) {
         @SuppressWarnings("unchecked")
         Collection<Object> col = (Collection<Object>) o;
         if ( null == col ) {
