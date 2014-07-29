@@ -114,4 +114,14 @@ public class ITestContextImpl implements ITestContext {
         return assignments;
     }
 
+    @Override
+    public Object getCurrentOwner() {
+        return owners.get(owners.size() - 1);
+    }
+
+    @Override
+    public String getCurrentField() {
+        return path.get(path.size() - 1);
+    }
+
 }

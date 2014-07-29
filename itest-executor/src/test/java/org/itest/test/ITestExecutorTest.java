@@ -28,7 +28,7 @@ package org.itest.test;
 import org.itest.ITestExecutor;
 import org.itest.config.ITestConfigImpl;
 import org.itest.executor.ITestExecutorUtil;
-import org.itest.impl.ITestNullObjectGeneratorImpl;
+import org.itest.impl.ITestDeclarativeObjectGeneratorImpl;
 import org.itest.test.example.SimpleExample;
 import org.junit.Assert;
 import org.junit.Test;
@@ -44,7 +44,7 @@ public class ITestExecutorTest {
     @Test
     public void nullObjectGeneratorTest() {
         ITestConfigImpl iTestConfigImpl = new ITestConfigImpl();
-        iTestConfigImpl.setITestObjectGenerator(new ITestNullObjectGeneratorImpl(iTestConfigImpl));
+        iTestConfigImpl.setITestObjectGenerator(new ITestDeclarativeObjectGeneratorImpl(iTestConfigImpl));
         ITestExecutor executor = ITestExecutorUtil.buildExecutor(iTestConfigImpl);
         Assert.assertEquals("", executor.performTestsFor(SimpleExample.class));
     }

@@ -47,6 +47,8 @@ public class ITestValueConverterImpl implements ITestValueConverter {
             res = Boolean.valueOf(value);
         } else if ( Date.class == clazz ) {
             res = new Date(Long.valueOf(value));
+        } else if ( clazz.isEnum() ) {
+            res = Enum.valueOf((Class<Enum>) clazz, value);
         } else if ( Class.class == clazz ) {
             try {
                 res = Class.forName(value);

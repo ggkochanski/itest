@@ -25,16 +25,19 @@
  */
 package org.itest.impl;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Map;
 
 import org.itest.ITestConfig;
 import org.itest.ITestContext;
+import org.itest.annotation.ITestField;
 import org.itest.param.ITestParamState;
 
-public class ITestNullObjectGeneratorImpl extends ITestRandomObjectGeneratorImpl {
+public class ITestDeclarativeObjectGeneratorImpl extends ITestRandomObjectGeneratorImpl {
 
-    public ITestNullObjectGeneratorImpl(ITestConfig iTestConfig) {
+    public ITestDeclarativeObjectGeneratorImpl(ITestConfig iTestConfig) {
         super(iTestConfig);
     }
 
@@ -62,4 +65,20 @@ public class ITestNullObjectGeneratorImpl extends ITestRandomObjectGeneratorImpl
         return super.fillMap(o, type, iTestState, map, iTestContext);
     }
 
+    @Override
+    protected void fillField(Field f, Object o, ITestParamState fITestState, Map<String, Type> map, ITestContext iTestContext) {
+        if ( null == fITestState && !iTestContext.isStaticAssignmentRegistered(o.getClass(), f.getName()) && !f.isAnnotationPresent(ITestField.class) ) {
+            return;
+        }
+        super.fillField(f, o, fITestState, map, iTestContext);
+    }
+
+    @Override
+    protected void fillMethod(Method m, Object res, ITestParamState mITestState, Map<String, Type> map, ITestContext iTestContext,
+            Map<String, Object> methodResults) {
+        if ( null == mITestState ) {
+            return;
+        }
+        super.fillMethod(m, res, mITestState, map, iTestContext, methodResults);
+    }
 }

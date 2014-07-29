@@ -44,4 +44,8 @@ public interface ITestContext {
 
     Map<List<String>, List<String>> getAssignments();
 
+    Object getCurrentOwner();
+
+    String getCurrentField();
+
 }
