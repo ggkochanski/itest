@@ -56,13 +56,17 @@ public class ITestExecutionVerifierImpl implements ITestExecutionVerifier {
     private void verify(Collection<ITestFieldVerificationResult> res, String name, Object resultObject, ITestParamState stateParam) {
         boolean testResult = false;
         try {
-            if ( null == resultObject ) {
-                testResult = (null == stateParam.getNames() && null == stateParam.getValue());
-                res.add(new ITestFieldVerificationResultImpl(name, stateParam, resultObject, testResult, null));
-            } else if ( null != stateParam.getValue() ) {
-                Object expectedValue = iTestConfig.getITestValueConverter().convert(resultObject.getClass(), stateParam.getValue());
-                testResult = resultObject.equals(expectedValue);
-                res.add(new ITestFieldVerificationResultImpl(name, stateParam.getValue(), resultObject, testResult, null));
+            if ( null == stateParam.getNames() ) {
+                if ( null == stateParam.getValue() ) {
+                    testResult = (null == resultObject);
+                    res.add(new ITestFieldVerificationResultImpl(name, null, resultObject, testResult, null));
+                } else if ( null == resultObject ) {
+                    res.add(new ITestFieldVerificationResultImpl(name, stateParam.getValue(), null, false, null));
+                } else {
+                    Object expectedValue = iTestConfig.getITestValueConverter().convert(resultObject.getClass(), stateParam.getValue());
+                    testResult = expectedValue.equals(resultObject);
+                    res.add(new ITestFieldVerificationResultImpl(name, stateParam.getValue(), resultObject, testResult, null));
+                }
             } else if ( resultObject instanceof Collection ) {
                 Iterable<String> fNames = stateParam.getNames();
                 if ( null != fNames ) {

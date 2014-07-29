@@ -36,6 +36,8 @@ public interface ITestDefinition {
 
     Method getITestMethod();
 
+    String getITestName();
+
     ITestParamState getInitParams();
 
     ITestParamState getVeryficationParams();

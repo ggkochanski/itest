@@ -154,7 +154,7 @@ public class ITestDefinitionFactoryImpl implements ITestDefinitionFactory {
                 for (ITest path : method.getAnnotation(ITests.class).value()) {
                     String testName = path.name();
                     if ( 0 == testName.length() ) {
-                        testName = method.toString() + "." + methodTestCounter;
+                        testName = method.getName() + "#itest" + methodTestCounter;
                     }
                     ITestIdentifier itestIdentifier = new ITestIdentifier(clazz, testName);
                     if ( null == itestMap.get(itestIdentifier) ) {

@@ -96,4 +96,8 @@ public class ITestDefinitionImpl implements ITestDefinition {
         return iTestStaticAssignments;
     }
 
+    @Override
+    public String getITestName() {
+        return iTestName;
+    }
 }

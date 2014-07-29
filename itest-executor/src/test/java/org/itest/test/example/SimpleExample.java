@@ -55,6 +55,13 @@ public class SimpleExample {
         return e.x.size();
     }
 
+    @ITests({ @ITest(init = "A:[aaa]", verify = "R:aaa") //
+    // ,@ITest(init = "A:[aaa]", verify = "R:null") - fixed
+    })
+    public String test(String a) {
+        return a;
+    }
+
     static class Entity<X> {
 
         private final List<X> x;

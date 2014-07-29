@@ -55,8 +55,9 @@ public class ITestExecutorUtil {
             for (ITestDefinition iTestPathDefinition : iTestFlowDefinitions) {
                 try {
                     ITestMethodExecutionResult executionData = itestConfig.getITestMethodExecutor().execute(iTestPathDefinition);
-                    Collection<ITestFieldVerificationResult> verificationResult = itestConfig.getITestExecutionVerifier().verify(
-                            iTestPathDefinition.getITestMethod().toString(), executionData, iTestPathDefinition.getVeryficationParams());
+                    String name = iTestPathDefinition.getITestClass().getName() + "." + iTestPathDefinition.getITestName();
+                    Collection<ITestFieldVerificationResult> verificationResult = itestConfig.getITestExecutionVerifier().verify(name, executionData,
+                            iTestPathDefinition.getVeryficationParams());
                     for (ITestFieldVerificationResult res : verificationResult) {
                         if ( !res.isSuccess() ) {
                             sb.append(res).append('\n');
