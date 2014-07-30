@@ -23,22 +23,22 @@
  * SOFTWARE.
  * </pre>
  */
-package org.itest;
+package org.itest.test.example5;
 
-public interface ITestConstants {
-    String THIS = "T";
+import org.itest.annotation.ITest;
+import org.itest.annotation.ITestRef;
+import org.itest.annotation.ITests;
 
-    String ARG = "A";
+public class DataProviderExample {
+    private MyEntityProvider myEntityProvider;
 
-    String OWNER = "O";
-
-    String RESULT = "R";
-
-    String ASSIGN = "=";
-
-    String ASSIGN_SEPARATOR = ":";
-
-    String NULL = "null";
-
-    String DYNAMIC = "D";
+    /*
+     * look at org/itest/test/example5/MyEntity.itest file
+     */
+    @ITests({
+            @ITest(initRef = @ITestRef(useClass = MyEntity.class, use = "empty", assign = "T:myEntityProvider:get(java.lang.Long)=T"), verify = "R:{id:null}"),
+            @ITest(initRef = @ITestRef(useClass = MyEntity.class, use = "example1", assign = "T:myEntityProvider:get(*)=T"), verify = "R:{id:0,value:example}") })
+    public MyEntity getMyEntity(Long id) {
+        return myEntityProvider.get(id);
+    }
 }

@@ -23,22 +23,13 @@
  * SOFTWARE.
  * </pre>
  */
-package org.itest;
+package org.itest.test.example2;
 
-public interface ITestConstants {
-    String THIS = "T";
+public class MyInterfaceImpl<T> implements MyInterface<T> {
 
-    String ARG = "A";
+    @Override
+    public T myInterfaceAction(T t) {
+        return t;
+    }
 
-    String OWNER = "O";
-
-    String RESULT = "R";
-
-    String ASSIGN = "=";
-
-    String ASSIGN_SEPARATOR = ":";
-
-    String NULL = "null";
-
-    String DYNAMIC = "D";
 }

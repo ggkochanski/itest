@@ -23,12 +23,12 @@
  * SOFTWARE.
  * </pre>
  */
-package org.itest.test.example;
+package org.itest.test.example1;
 
 import java.util.List;
 
 import org.itest.annotation.ITest;
-import org.itest.annotation.ITestInitRef;
+import org.itest.annotation.ITestRef;
 import org.itest.annotation.ITests;
 
 public class SimpleExample {
@@ -49,7 +49,7 @@ public class SimpleExample {
 
     private Entity<Object> e;
 
-    @ITests({ @ITest(initRef = @ITestInitRef(use = "max1", assign = "T.e=A.0"), verify = "R:3,T:{e:{x:[1,{},333]}}"), //
+    @ITests({ @ITest(initRef = @ITestRef(use = "max1", assign = "T:e=A:0"), verify = "R:3,T:{e:{x:[1,{},333]}}"), //
             @ITest(init = "T:{e:{x:[{},{}]}}", verify = "R:2") })
     public int size() {
         return e.x.size();

@@ -39,7 +39,7 @@ import org.itest.ITestConfig;
 import org.itest.ITestConstants;
 import org.itest.annotation.ITest;
 import org.itest.annotation.ITestAssignment;
-import org.itest.annotation.ITestInitRef;
+import org.itest.annotation.ITestRef;
 import org.itest.annotation.ITests;
 import org.itest.definition.ITestDefinition;
 import org.itest.definition.ITestDefinitionFactory;
@@ -115,12 +115,10 @@ public class ITestDefinitionFactoryImpl implements ITestDefinitionFactory {
     }
 
     private ITestParamState loadParams(ITestIdentifier itestIdentifier) {
-        StringBuilder sb = new StringBuilder(128);
-        sb.append(itestIdentifier.itestClass.getName().replace('.', '/'));
-        sb.append('.').append(itestIdentifier.itestName).append(".itest");
-        InputStream is = itestIdentifier.itestClass.getClassLoader().getResourceAsStream(sb.toString());
+        String resourceName = new StringBuilder(128).append(itestIdentifier.itestClass.getName().replace('.', '/')).append(".itest").toString();
+        InputStream is = itestIdentifier.itestClass.getClassLoader().getResourceAsStream(resourceName);
         if ( null == is ) {
-            throw new ITestException("Failed to load params for: " + itestIdentifier);
+            throw new ITestException("File (" + resourceName + ") not found.");
         }
         String init;
         try {
@@ -129,8 +127,12 @@ public class ITestDefinitionFactoryImpl implements ITestDefinitionFactory {
             throw new RuntimeException(e);
         }
         ITestParamState initParams = parseInitParam(null, init);
+        ITestParamState namedParams = initParams.getElement(itestIdentifier.itestName);
+        if ( null == namedParams ) {
+            throw new ITestException("Data definition for test (" + itestIdentifier.itestName + ") not found in " + resourceName);
+        }
         ITestParamStateImpl res = new ITestParamStateImpl();
-        res.addElement(ITestConstants.THIS, initParams);
+        res.addElement(ITestConstants.THIS, namedParams);
         return res;
     }
 
@@ -161,8 +163,8 @@ public class ITestDefinitionFactoryImpl implements ITestDefinitionFactory {
                         itestMap.put(itestIdentifier, new ITestDeclaration(method, path));
                         Collection<ITestDependency> col = new ArrayList<ITestDependency>();
                         itestDependencyMap.put(itestIdentifier, col);
-                        for (ITestInitRef initRef : path.initRef()) {
-                            Class<?> refClass = initRef.useClass() == ITestInitRef.class ? clazz : initRef.useClass();
+                        for (ITestRef initRef : path.initRef()) {
+                            Class<?> refClass = initRef.useClass() == ITestRef.class ? clazz : initRef.useClass();
                             String refTestName = initRef.use();
                             col.add(new ITestDependency(initRef.assign(), new ITestIdentifier(refClass, refTestName)));
                             if ( refClass != clazz ) {

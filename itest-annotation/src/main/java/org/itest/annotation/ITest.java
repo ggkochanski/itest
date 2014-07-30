@@ -39,11 +39,11 @@ public @interface ITest {
 
     String init() default "";
 
-    ITestInitRef[] initRef() default {};
+    ITestRef[] initRef() default {};
 
     VerifyRef[] verifyRef() default {};
 
-    String verify();
+    String verify() default "";
 
     ITestGeneric[] generics() default {};
 

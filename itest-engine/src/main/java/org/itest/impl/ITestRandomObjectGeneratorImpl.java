@@ -389,11 +389,8 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
                 iTestContext.registerAssignment(o.getClass(), f.getName());
             } else if ( null == fITestState && f.isAnnotationPresent(ITestFieldAssignment.class) ) {
                 iTestContext.registerAssignment(f.getAnnotation(ITestFieldAssignment.class).value());
-            } else if ( f.isAnnotationPresent(ITestFieldImpl.class) ) {
-                if ( null == fITestState ) {
-                    fITestState = EMPTY_STATE;
-                }
-                Object oRes = generateRandom(f.getAnnotation(ITestFieldImpl.class).value(), fITestState, map, iTestContext);
+            } else if ( null == fITestState && f.isAnnotationPresent(ITestFieldImpl.class) ) {
+                Object oRes = generateRandom(f.getAnnotation(ITestFieldImpl.class).value(), EMPTY_STATE, map, iTestContext);
                 f.set(o, oRes);
             } else if ( null != fITestValue ) {
                 if ( fITestValue.startsWith(":") ) {

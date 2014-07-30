@@ -29,7 +29,11 @@ import org.itest.ITestExecutor;
 import org.itest.config.ITestConfigImpl;
 import org.itest.executor.ITestExecutorUtil;
 import org.itest.impl.ITestDeclarativeObjectGeneratorImpl;
-import org.itest.test.example.SimpleExample;
+import org.itest.test.example1.SimpleExample;
+import org.itest.test.example2.InterfaceExample;
+import org.itest.test.example3.ReuseTestDataExample;
+import org.itest.test.example4.CollectionsExample;
+import org.itest.test.example5.DataProviderExample;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -46,6 +50,7 @@ public class ITestExecutorTest {
         ITestConfigImpl iTestConfigImpl = new ITestConfigImpl();
         iTestConfigImpl.setITestObjectGenerator(new ITestDeclarativeObjectGeneratorImpl(iTestConfigImpl));
         ITestExecutor executor = ITestExecutorUtil.buildExecutor(iTestConfigImpl);
-        Assert.assertEquals("", executor.performTestsFor(SimpleExample.class));
+        Assert.assertEquals("", executor.performTestsFor(SimpleExample.class, InterfaceExample.class, ReuseTestDataExample.class, CollectionsExample.class,
+                DataProviderExample.class));
     }
 }

@@ -23,22 +23,15 @@
  * SOFTWARE.
  * </pre>
  */
-package org.itest;
+package org.itest.test.example2;
 
-public interface ITestConstants {
-    String THIS = "T";
+import java.util.Date;
 
-    String ARG = "A";
+public class MyInterfaceImpl2 implements MyInterface<Date> {
 
-    String OWNER = "O";
+    @Override
+    public Date myInterfaceAction(Date t) {
+        return new Date( -t.getTime());
+    }
 
-    String RESULT = "R";
-
-    String ASSIGN = "=";
-
-    String ASSIGN_SEPARATOR = ":";
-
-    String NULL = "null";
-
-    String DYNAMIC = "D";
 }

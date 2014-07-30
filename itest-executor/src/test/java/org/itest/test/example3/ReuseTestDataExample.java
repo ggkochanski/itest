@@ -23,22 +23,27 @@
  * SOFTWARE.
  * </pre>
  */
-package org.itest;
+package org.itest.test.example3;
 
-public interface ITestConstants {
-    String THIS = "T";
+import org.itest.annotation.ITest;
+import org.itest.annotation.ITestRef;
+import org.itest.annotation.ITests;
 
-    String ARG = "A";
+public class ReuseTestDataExample {
+    private String s;
 
-    String OWNER = "O";
+    @ITests({
+            @ITest(name = "t1", init = "T:{s:abcdbcdcdd},A:[a]", verify = "R:1"), //
+            @ITest(initRef = @ITestRef(use = "t1"), init = "A:[b]", verify = "R:2"),
+            @ITest(initRef = @ITestRef(use = "t1"), init = "T:{s:aaa}", verify = "R:3") })
+    public int countChar(char c) {
+        int res = 0;
+        for (int i = 0; i < s.length(); i++) {
+            if ( c == s.charAt(i) ) {
+                res++;
+            }
+        }
+        return res;
+    }
 
-    String RESULT = "R";
-
-    String ASSIGN = "=";
-
-    String ASSIGN_SEPARATOR = ":";
-
-    String NULL = "null";
-
-    String DYNAMIC = "D";
 }

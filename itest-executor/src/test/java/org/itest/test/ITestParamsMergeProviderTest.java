@@ -43,7 +43,7 @@ public class ITestParamsMergeProviderTest {
     public void testSingle() {
         ITestParamMerger p = new ITestParamMergerImpl();
         ITestParamState state = new ITestSimpleJsonParamParserImpl().parse("'A':[{'a':[{'field':'vvv'}]}]");
-        ITestParamState unified = p.merge(Collections.singleton("T=A.0"), Collections.singleton(state));
+        ITestParamState unified = p.merge(Collections.singleton("T=A:0"), Collections.singleton(state));
         Assert.assertEquals("vvv", unified.getElement("T").getElement("a").getElement("0").getElement("field").getValue());
     }
 
@@ -53,7 +53,7 @@ public class ITestParamsMergeProviderTest {
         Collection<ITestParamState> states = new ArrayList<ITestParamState>();
         states.add(new ITestSimpleJsonParamParserImpl().parse("'T':{'a':[{'field':'vvv'}]}"));
         states.add(new ITestSimpleJsonParamParserImpl().parse("'A':[{'a':[{'field2':'vvv2'}]}]"));
-        ITestParamState unified = p.merge(Arrays.asList("", "T=A.0"), states);
+        ITestParamState unified = p.merge(Arrays.asList("", "T=A:0"), states);
         Assert.assertEquals("vvv", unified.getElement("T").getElement("a").getElement("0").getElement("field").getValue());
         Assert.assertEquals("vvv2", unified.getElement("T").getElement("a").getElement("0").getElement("field2").getValue());
     }

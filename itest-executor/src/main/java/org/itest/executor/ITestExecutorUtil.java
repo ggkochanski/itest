@@ -54,8 +54,8 @@ public class ITestExecutorUtil {
             StringBuilder sb = new StringBuilder();
             for (ITestDefinition iTestPathDefinition : iTestFlowDefinitions) {
                 try {
-                    ITestMethodExecutionResult executionData = itestConfig.getITestMethodExecutor().execute(iTestPathDefinition);
                     String name = iTestPathDefinition.getITestClass().getName() + "." + iTestPathDefinition.getITestName();
+                    ITestMethodExecutionResult executionData = itestConfig.getITestMethodExecutor().execute(iTestPathDefinition);
                     Collection<ITestFieldVerificationResult> verificationResult = itestConfig.getITestExecutionVerifier().verify(name, executionData,
                             iTestPathDefinition.getVeryficationParams());
                     for (ITestFieldVerificationResult res : verificationResult) {
@@ -64,7 +64,8 @@ public class ITestExecutorUtil {
                         }
                     }
                 } catch (InvocationTargetException e) {
-                    sb.append(iTestPathDefinition.getITestMethod().toString()).append(e.getTargetException()).append('\n');
+                    String name = iTestPathDefinition.getITestClass().getName() + "." + iTestPathDefinition.getITestName();
+                    sb.append(name).append(' ').append(e.getTargetException()).append('\n');
                     StackTraceElement[] trace = e.getTargetException().getStackTrace();
                     for (int i = 0; i < trace.length; i++) {
                         sb.append("\tat ").append(trace[i]).append('\n');

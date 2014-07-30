@@ -23,22 +23,16 @@
  * SOFTWARE.
  * </pre>
  */
-package org.itest;
+package org.itest.test.example5;
 
-public interface ITestConstants {
-    String THIS = "T";
+import java.util.Date;
 
-    String ARG = "A";
+public class MyEntity {
+    private Long id;
 
-    String OWNER = "O";
+    private String value;
 
-    String RESULT = "R";
+    private String modifiedBy;
 
-    String ASSIGN = "=";
-
-    String ASSIGN_SEPARATOR = ":";
-
-    String NULL = "null";
-
-    String DYNAMIC = "D";
+    private Date modifiedTime;
 }

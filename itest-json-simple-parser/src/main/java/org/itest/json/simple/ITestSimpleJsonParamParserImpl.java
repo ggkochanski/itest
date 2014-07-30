@@ -34,6 +34,9 @@ public class ITestSimpleJsonParamParserImpl implements ITestParamParser {
 
     @Override
     public ITestParamState parse(String params) {
+        if ( null == params || 0 == params.length() ) {
+            return null;
+        }
         StringBuilder sb = new StringBuilder(params);
         if ( '{' != sb.charAt(0) ) {
             sb.insert(0, '{');

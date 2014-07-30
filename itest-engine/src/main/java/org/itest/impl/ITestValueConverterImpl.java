@@ -43,8 +43,15 @@ public class ITestValueConverterImpl implements ITestValueConverter {
             res = Integer.valueOf(value);
         } else if ( Long.class == clazz || long.class == clazz ) {
             res = Long.valueOf(value);
+        } else if ( Double.class == clazz || double.class == clazz ) {
+            res = Double.valueOf(value);
         } else if ( Boolean.class == clazz || boolean.class == clazz ) {
             res = Boolean.valueOf(value);
+        } else if ( Character.class == clazz || char.class == clazz ) {
+            if ( value.length() > 1 ) {
+                throw new ITestInitializationException("Character expected, found (" + value + ") " + value.length() + " characters.", null);
+            }
+            res = value.charAt(0);
         } else if ( Date.class == clazz ) {
             res = new Date(Long.valueOf(value));
         } else if ( clazz.isEnum() ) {

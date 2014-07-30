@@ -122,7 +122,8 @@ public class ITestParamMergerImpl implements ITestParamMerger {
         if ( 0 == transformation.length() ) {
             return itestParam.getElement(element);
         }
-        StringTokenizer t = new StringTokenizer(transformation.replaceAll(ITestConstants.ASSIGN, "." + ITestConstants.ASSIGN + "."), ".");
+        String s = transformation.replaceAll(ITestConstants.ASSIGN, ITestConstants.ASSIGN_SEPARATOR + ITestConstants.ASSIGN + ITestConstants.ASSIGN_SEPARATOR);
+        StringTokenizer t = new StringTokenizer(s, ITestConstants.ASSIGN_SEPARATOR);
         String token = t.nextToken();
         if ( element.equals(token) ) {
             ITestParamStateImpl prevState = new ITestParamStateImpl();
