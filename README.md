@@ -13,7 +13,7 @@ Simple Example usage:
         return a + b;
     }
 
-https://github.com/ggkochanski/itest/blob/master/itest-executor/src/test/java/org/itest/test/example/SimpleExample.java
+https://github.com/ggkochanski/itest/blob/master/itest-executor/src/test/java/org/itest/test/example1/SimpleExample.java
 
 Simple Example execution:
 ------------------------
