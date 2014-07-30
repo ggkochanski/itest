@@ -51,7 +51,8 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.itest.ITestConfig;
 import org.itest.ITestConstants;
 import org.itest.ITestContext;
-import org.itest.annotation.ITestField;
+import org.itest.annotation.ITestFieldAssignment;
+import org.itest.annotation.ITestFieldImpl;
 import org.itest.exception.ITestException;
 import org.itest.exception.ITestIllegalArgumentException;
 import org.itest.exception.ITestInitializationException;
@@ -383,10 +384,17 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             Type fType = getTypeProxy(f.getGenericType(), map);
             iTestContext.enter(o, f.getName());
             String fITestValue = fITestState == null ? null : fITestState.getValue();
+
             if ( null == fITestState && iTestContext.isStaticAssignmentRegistered(o.getClass(), f.getName()) ) {
                 iTestContext.registerAssignment(o.getClass(), f.getName());
-            } else if ( null == fITestState && f.isAnnotationPresent(ITestField.class) ) {
-                iTestContext.registerAssignment(f.getAnnotation(ITestField.class).value());
+            } else if ( null == fITestState && f.isAnnotationPresent(ITestFieldAssignment.class) ) {
+                iTestContext.registerAssignment(f.getAnnotation(ITestFieldAssignment.class).value());
+            } else if ( f.isAnnotationPresent(ITestFieldImpl.class) ) {
+                if ( null == fITestState ) {
+                    fITestState = EMPTY_STATE;
+                }
+                Object oRes = generateRandom(f.getAnnotation(ITestFieldImpl.class).value(), fITestState, map, iTestContext);
+                f.set(o, oRes);
             } else if ( null != fITestValue ) {
                 if ( fITestValue.startsWith(":") ) {
                     // TODO: register assignment

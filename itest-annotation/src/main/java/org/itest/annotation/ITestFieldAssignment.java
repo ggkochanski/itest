@@ -32,6 +32,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface ITestField {
+public @interface ITestFieldAssignment {
     String value();
 }

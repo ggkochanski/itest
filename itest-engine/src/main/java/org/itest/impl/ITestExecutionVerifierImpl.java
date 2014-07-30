@@ -25,10 +25,12 @@
  */
 package org.itest.impl;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.itest.ITestConfig;
 import org.itest.exception.ITestMethodExecutionException;
@@ -68,17 +70,55 @@ public class ITestExecutionVerifierImpl implements ITestExecutionVerifier {
                     res.add(new ITestFieldVerificationResultImpl(name, stateParam.getValue(), resultObject, testResult, null));
                 }
             } else if ( resultObject instanceof Collection ) {
-                Iterable<String> fNames = stateParam.getNames();
-                if ( null != fNames ) {
-                    List<Object> list = new ArrayList<Object>((Collection<Object>) resultObject);
-                    for (String fName : stateParam.getNames()) {
-                        int index = Integer.parseInt(fName);
-                        if ( index >= list.size() ) {
-                            res.add(new ITestFieldVerificationResultImpl(name + ".size()", Integer.valueOf(index + 1), Integer.valueOf(list.size()), false,
-                                    null));
-                        } else {
-                            verify(res, name + "." + fName, list.get(index), stateParam.getElement(fName));
+                List<Object> list = new ArrayList<Object>((Collection<Object>) resultObject);
+                for (String fName : stateParam.getNames()) {
+                    int index = Integer.parseInt(fName);
+                    if ( index >= list.size() ) {
+                        res.add(new ITestFieldVerificationResultImpl(name + ".size()", Integer.valueOf(index + 1), Integer.valueOf(list.size()), false, null));
+                    } else {
+                        verify(res, name + "." + fName, list.get(index), stateParam.getElement(fName));
+                    }
+                }
+            } else if ( resultObject instanceof Map ) {
+                Map<Object, Object> map = (Map<Object, Object>) resultObject;
+                for (String fName : stateParam.getNames()) {
+                    ITestParamState mState = stateParam.getElement(fName);
+                    if ( null == mState || null == mState.getNames() ) {
+                        res.add(new ITestFieldVerificationResultImpl(name, "key,value for map", null, false, null));
+                    } else {
+                        Object key = null;
+                        ITestParamState vState = null;
+                        for (String mName : mState.getNames()) {
+                            if ( "key".equals(mName) ) {
+                                // TODO: add support to keys other then String
+                                key = mState.getElement("key").getValue();
+                            } else if ( "value".equals(mName) ) {
+                                vState = mState.getElement("value");
+                            } else {
+                                res.add(new ITestFieldVerificationResultImpl(name, "'key' or 'value' attributes allowed", mName, false, null));
+                                break;
+                            }
                         }
+                        if ( null == key ) {
+                            res.add(new ITestFieldVerificationResultImpl(name, "key attribute", null, false, null));
+                        } else if ( null == vState ) {
+                            testResult = map.containsKey(key);
+                            res.add(new ITestFieldVerificationResultImpl(name + "[" + key + "]", "containsKey", testResult ? "containts" : "not contain",
+                                    testResult, null));
+                            break;
+                        } else {
+                            verify(res, name + "[" + key + "]", map.get(key), vState);
+                        }
+                    }
+                }
+            } else if ( resultObject.getClass().isArray() ) {
+                int aSize = Array.getLength(resultObject);
+                for (String fName : stateParam.getNames()) {
+                    int index = Integer.parseInt(fName);
+                    if ( index >= aSize ) {
+                        res.add(new ITestFieldVerificationResultImpl(name + ".size()", Integer.valueOf(index + 1), Integer.valueOf(aSize), false, null));
+                    } else {
+                        verify(res, name + "." + fName, Array.get(resultObject, index), stateParam.getElement(fName));
                     }
                 }
             } else {
@@ -108,7 +148,7 @@ public class ITestExecutionVerifierImpl implements ITestExecutionVerifier {
             } catch (NoSuchFieldException e) {
                 // do nothing, search in superclass
             } catch (SecurityException e) {
-                throw new ITestMethodExecutionException("Security Exception", e);
+                throw new ITestMethodExecutionException("Security Exception for " + itestObject.getClass().getName() + "." + name, e);
             }
         } while (null != (clazz = clazz.getSuperclass()));
         if ( null == field ) {

@@ -32,7 +32,8 @@ import java.util.Map;
 
 import org.itest.ITestConfig;
 import org.itest.ITestContext;
-import org.itest.annotation.ITestField;
+import org.itest.annotation.ITestFieldAssignment;
+import org.itest.annotation.ITestFieldImpl;
 import org.itest.param.ITestParamState;
 
 public class ITestDeclarativeObjectGeneratorImpl extends ITestRandomObjectGeneratorImpl {
@@ -67,7 +68,8 @@ public class ITestDeclarativeObjectGeneratorImpl extends ITestRandomObjectGenera
 
     @Override
     protected void fillField(Field f, Object o, ITestParamState fITestState, Map<String, Type> map, ITestContext iTestContext) {
-        if ( null == fITestState && !iTestContext.isStaticAssignmentRegistered(o.getClass(), f.getName()) && !f.isAnnotationPresent(ITestField.class) ) {
+        if ( null == fITestState && !iTestContext.isStaticAssignmentRegistered(o.getClass(), f.getName()) && !f.isAnnotationPresent(ITestFieldAssignment.class)
+                && !f.isAnnotationPresent(ITestFieldImpl.class) ) {
             return;
         }
         super.fillField(f, o, fITestState, map, iTestContext);
