@@ -56,7 +56,7 @@ public class CollectionsExample {
 
     @ITests({ @ITest(name = "mapInit", init = "T:{map:[{key:key1,value:value1},{key:key2}]}"),
             @ITest(name = "checkValueExists", initRef = @ITestRef(use = "mapInit"), verify = "T:{map:[{key:key1,value:value1},{key:xxx,value:null}]}"),
-            @ITest(name = "checkKeyExists", initRef = @ITestRef(use = "mapInit"), verify = "T:{map:[{key:key1},{key:key2}]}"), })
+            @ITest(name = "checkKeyExists", initRef = @ITestRef(use = "mapInit"), verify = "T:{map:[{key:key1},{key:key2}]}") })
     public String getFromMap(String key) {
         return map.get(key);
     }

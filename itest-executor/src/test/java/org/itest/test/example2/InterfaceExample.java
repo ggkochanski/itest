@@ -38,7 +38,7 @@ public class InterfaceExample {
     @ITests({
             @ITest(name = "dynamic interface", init = "T:{myInterface:{myInterfaceAction(*):1000}},A:[0]", verify = "R:'Thu Jan 01 01:00:01 CET 1970'"),
             @ITest(name = "interface specific impl", init = "T:{myInterface:{class:org.itest.test.example2.MyInterfaceImpl2}},A:[1000]", verify = "R:'Thu Jan 01 00:59:59 CET 1970'"),
-            @ITest(name = "interface default impl", init = "A:[1000]", verify = "R:'Thu Jan 01 01:00:01 CET 1970'"), })
+            @ITest(name = "interface default impl", init = "A:[1000]", verify = "R:'Thu Jan 01 01:00:01 CET 1970'") })
     public String testMethod(Date a) {
         return myInterface.myInterfaceAction(a).toString();
     }
