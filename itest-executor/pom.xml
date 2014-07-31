@@ -4,23 +4,23 @@
 	<parent>
 		<artifactId>itest</artifactId>
 		<groupId>org.itest</groupId>
-		<version>1.0.2</version>
+		<version>1.0.3-SNAPSHOT</version>
 	</parent>
 	<groupId>org.itest</groupId>
 	<artifactId>itest-executor</artifactId>
-	<version>1.0.2</version>
+	<version>1.0.3-SNAPSHOT</version>
 	<name>itest-executor</name>
 	<url>https://github.com/ggkochanski/itest/</url>
 	<dependencies>
 		<dependency>
 			<groupId>org.itest</groupId>
 			<artifactId>itest-engine</artifactId>
-			<version>1.0.2</version>
+			<version>1.0.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.itest</groupId>
 			<artifactId>itest-json-simple-parser</artifactId>
-			<version>1.0.2</version>
+			<version>1.0.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

@@ -4,11 +4,11 @@
 	<parent>
 		<artifactId>itest</artifactId>
 		<groupId>org.itest</groupId>
-		<version>1.0.2</version>
+		<version>1.0.3-SNAPSHOT</version>
 	</parent>
 	<groupId>org.itest</groupId>
 	<artifactId>itest-annotation</artifactId>
-	<version>1.0.2</version>
+	<version>1.0.3-SNAPSHOT</version>
 	<name>itest-annotation</name>
 	<url>https://github.com/ggkochanski/itest/</url>
 	<properties>
