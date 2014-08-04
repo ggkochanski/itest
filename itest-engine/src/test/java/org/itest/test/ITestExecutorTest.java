@@ -29,6 +29,7 @@ import org.itest.ITestExecutor;
 import org.itest.config.ITestConfigImpl;
 import org.itest.executor.ITestExecutorUtil;
 import org.itest.impl.ITestDeclarativeObjectGeneratorImpl;
+import org.itest.impl.ITestRandomObjectGeneratorImpl;
 import org.itest.test.example1.SimpleExample;
 import org.itest.test.example2.InterfaceExample;
 import org.itest.test.example3.ReuseTestDataExample;
@@ -40,16 +41,22 @@ import org.junit.Test;
 public class ITestExecutorTest {
 
     @Test
-    public void test() {
-        ITestExecutor executor = ITestExecutorUtil.buildExecutor(new ITestConfigImpl());
-        Assert.assertEquals("", executor.performTestsFor(SimpleExample.class));
+    public void randomObjectGeneratorTest() {
+        ITestConfigImpl iTestConfigImpl = new ITestConfigImpl();
+        iTestConfigImpl.setITestObjectGenerator(new ITestRandomObjectGeneratorImpl(iTestConfigImpl));
+        ITestExecutor executor = ITestExecutorUtil.buildExecutor(iTestConfigImpl);
+        perfomTests(executor);
     }
 
     @Test
-    public void nullObjectGeneratorTest() {
+    public void declarativeObjectGeneratorTest() {
         ITestConfigImpl iTestConfigImpl = new ITestConfigImpl();
         iTestConfigImpl.setITestObjectGenerator(new ITestDeclarativeObjectGeneratorImpl(iTestConfigImpl));
         ITestExecutor executor = ITestExecutorUtil.buildExecutor(iTestConfigImpl);
+        perfomTests(executor);
+    }
+
+    void perfomTests(ITestExecutor executor) {
         Assert.assertEquals("", executor.performTestsFor(SimpleExample.class, InterfaceExample.class, ReuseTestDataExample.class, CollectionsExample.class,
                 DataProviderExample.class));
     }

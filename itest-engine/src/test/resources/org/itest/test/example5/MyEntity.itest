@@ -21,6 +21,7 @@
 // SOFTWARE.
 
 empty:{
+	id:null
 },
 example1:{
 	id:0,

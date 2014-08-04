@@ -29,11 +29,11 @@ import org.itest.ITestConfig;
 import org.itest.definition.ITestDefinitionFactory;
 import org.itest.execution.ITestMethodExecutor;
 import org.itest.generator.ITestObjectGenerator;
+import org.itest.impl.ITestDeclarativeObjectGeneratorImpl;
 import org.itest.impl.ITestDefinitionFactoryImpl;
 import org.itest.impl.ITestExecutionVerifierImpl;
 import org.itest.impl.ITestMethodExecutorImpl;
 import org.itest.impl.ITestParamMergerImpl;
-import org.itest.impl.ITestRandomObjectGeneratorImpl;
 import org.itest.impl.ITestValueConverterImpl;
 import org.itest.json.simple.ITestSimpleJsonParamParserImpl;
 import org.itest.param.ITestParamMerger;
@@ -44,7 +44,7 @@ import org.itest.verify.ITestExecutionVerifier;
 public class ITestConfigImpl implements ITestConfig {
     private ITestDefinitionFactory iTestPathDefinitionFactory = new ITestDefinitionFactoryImpl(this);
 
-    private ITestObjectGenerator iTestObjectGenerator = new ITestRandomObjectGeneratorImpl(this);
+    private ITestObjectGenerator iTestObjectGenerator = new ITestDeclarativeObjectGeneratorImpl(this);
 
     private ITestExecutionVerifier iTestObjectVerifier = new ITestExecutionVerifierImpl(this);
 
