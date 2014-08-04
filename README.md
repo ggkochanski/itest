@@ -5,7 +5,7 @@ Java Inline Test Framework
 
 
 
-Simple Example usage:
+[Simple usage example](https://github.com/ggkochanski/itest/blob/master/itest-engine/src/test/java/org/itest/test/example1/SimpleExample.java) :
 --------------------
 
     @ITests(@ITest(init = "A:[3,16]", verify = "R:19"))
@@ -13,12 +13,13 @@ Simple Example usage:
         return a + b;
     }
 
-    [SimpleExample](https://github.com/ggkochanski/itest/blob/master/itest-engine/src/test/java/org/itest/test/example1/SimpleExample.java)
 
-Simple Example execution:
+
+
+[Simple Example execution](https://github.com/ggkochanski/itest/blob/master/itest-engine/src/test/java/org/itest/test/ITestExecutorTest.java):
 ------------------------
 
         Assert.assertEquals("", executor.performTestsFor(SimpleExample.class));
 
-https://github.com/ggkochanski/itest/blob/master/itest-engine/src/test/java/org/itest/test/ITestExecutorTest.java
+
 
