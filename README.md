@@ -20,5 +20,5 @@ Simple Example execution:
 
         Assert.assertEquals("", executor.performTestsFor(SimpleExample.class));
 
-https://github.com/ggkochanski/itest/blob/master/itest-engint/src/test/java/org/itest/test/ITestExecutorTest.java
+https://github.com/ggkochanski/itest/blob/master/itest-engine/src/test/java/org/itest/test/ITestExecutorTest.java
 
