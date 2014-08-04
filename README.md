@@ -1,4 +1,4 @@
-[Java Inline Test Framework Wiki](../../wiki)
+[Java Inline Test Framework](../../wiki)
 =====
 Java Inline Test Framework is designed to unit testing by data (without additional source code). Oriented on re-usage of test data definitions. Applicable for shallow (dynamic proxies) or deep (selected implementations) tests. You define tests by composing initial data and expected result data.
 
@@ -22,3 +22,4 @@ Java Inline Test Framework is designed to unit testing by data (without addition
 
 
 
+For more details visit [ITest project Wiki page](../../wiki).
