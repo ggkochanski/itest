@@ -55,6 +55,10 @@ public class ITestExecutorUtil {
             for (ITestDefinition iTestPathDefinition : iTestFlowDefinitions) {
                 try {
                     String name = iTestPathDefinition.getITestClass().getName() + "." + iTestPathDefinition.getITestName();
+                    // Do not execute tests without 'verify' specified. #4
+                    if ( null == iTestPathDefinition.getVeryficationParams() ) {
+                        continue;
+                    }
                     ITestMethodExecutionResult executionData = itestConfig.getITestMethodExecutor().execute(iTestPathDefinition);
                     Collection<ITestFieldVerificationResult> verificationResult = itestConfig.getITestExecutionVerifier().verify(name, executionData,
                             iTestPathDefinition.getVeryficationParams());
