@@ -52,7 +52,7 @@ import org.itest.ITestConfig;
 import org.itest.ITestConstants;
 import org.itest.ITestContext;
 import org.itest.annotation.ITestFieldAssignment;
-import org.itest.annotation.ITestFieldImpl;
+import org.itest.annotation.ITestFieldClass;
 import org.itest.exception.ITestException;
 import org.itest.exception.ITestIllegalArgumentException;
 import org.itest.exception.ITestInitializationException;
@@ -389,8 +389,8 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
                 iTestContext.registerAssignment(o.getClass(), f.getName());
             } else if ( null == fITestState && f.isAnnotationPresent(ITestFieldAssignment.class) ) {
                 iTestContext.registerAssignment(f.getAnnotation(ITestFieldAssignment.class).value());
-            } else if ( null == fITestState && f.isAnnotationPresent(ITestFieldImpl.class) ) {
-                Object oRes = generateRandom(f.getAnnotation(ITestFieldImpl.class).value(), EMPTY_STATE, map, iTestContext);
+            } else if ( null == fITestState && f.isAnnotationPresent(ITestFieldClass.class) ) {
+                Object oRes = generateRandom(f.getAnnotation(ITestFieldClass.class).value(), EMPTY_STATE, map, iTestContext);
                 f.set(o, oRes);
             } else if ( null != fITestValue ) {
                 if ( fITestValue.startsWith(":") ) {
