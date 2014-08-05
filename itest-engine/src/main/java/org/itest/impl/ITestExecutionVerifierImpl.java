@@ -192,7 +192,7 @@ public class ITestExecutionVerifierImpl implements ITestExecutionVerifier {
             StringBuilder sb = new StringBuilder();
             sb.append(success ? "Success" : "Failure").append(" ").append(name).append(".");
             if ( !success ) {
-                sb.append(" Expected: ").append(expectedResult).append(" acutal: ").append(actualResult);
+                sb.append(" Expected: ").append(expectedResult).append(" actual: ").append(actualResult);
             }
             if ( null != message ) {
                 sb.append(" (").append(message).append(")");
