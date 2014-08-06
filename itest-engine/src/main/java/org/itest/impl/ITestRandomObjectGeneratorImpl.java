@@ -200,7 +200,7 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             if ( type instanceof Class<?> ) {
                 clazz = (Class<?>) type;
             } else if ( type instanceof WildcardType ) {
-                throw new ITestException("Wildcard type (" + type + ") not supported");
+                clazz = inferClassTypeFromWildcardType(type);
             } else {
                 clazz = (Class<?>) ((ParameterizedType) type).getRawType();
             }
@@ -233,7 +233,10 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
                 // probably proxy will be required here
                 res = ((ParameterizedType) type).getActualTypeArguments()[0];
             } else {
-                Type typeActualArguments[] = ((ParameterizedType) type).getActualTypeArguments();
+                Type[] typeActualArguments = {};
+                if( !(type instanceof WildcardType)){
+                    typeActualArguments = ((ParameterizedType) type).getActualTypeArguments();
+                }
                 TypeVariable<?> typeArguments[] = clazz.getTypeParameters();
                 final Map<String, Type> map = new HashMap<String, Type>(itestGenericMap);
                 for (int i = 0; i < typeActualArguments.length; i++) {
@@ -245,6 +248,21 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             }
         }
         return (T) res;
+    }
+
+    private Class<?> inferClassTypeFromWildcardType(Type type) {
+      Class<?> resultClass = null;
+      if(type instanceof WildcardType){
+      WildcardType sampleType = (WildcardType) type;
+        Type[] lowerBounds = sampleType.getLowerBounds();
+        Type[] upperBounds = sampleType.getUpperBounds();
+        if(lowerBounds.length != 0){
+          resultClass = (Class<?>) lowerBounds[0];
+        } else if(upperBounds.length != 0){
+          resultClass = (Class<?>) upperBounds[0];
+        } 
+      }
+      return resultClass;
     }
 
     private Object getCurrentObject(ITestContext iTestContext) {
