@@ -118,7 +118,7 @@ public class SimpleJsonTokenizer {
                 return stringTill(c);
             default:
                 StringBuffer sb = new StringBuffer();
-                while (c >= ' ' && ",:]}/\\\"[{;=#".indexOf(c) < 0) {
+                while (c >= ' ' && ",:]}/\"[{;=#".indexOf(c) < 0) {
                     sb.append(c);
                     c = next();
                 }
@@ -142,6 +142,6 @@ public class SimpleJsonTokenizer {
 
     @Override
     public String toString() {
-        return " at character " + this.index + " of " + this.source;
+        return " at character " + this.index + " (" + source.substring(index) + ")";
     }
 }

@@ -234,7 +234,7 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
                 res = ((ParameterizedType) type).getActualTypeArguments()[0];
             } else {
                 Type[] typeActualArguments = {};
-                if( !(type instanceof WildcardType)){
+                if ( !(type instanceof WildcardType) ) {
                     typeActualArguments = ((ParameterizedType) type).getActualTypeArguments();
                 }
                 TypeVariable<?> typeArguments[] = clazz.getTypeParameters();
@@ -251,18 +251,18 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
     }
 
     private Class<?> inferClassTypeFromWildcardType(Type type) {
-      Class<?> resultClass = null;
-      if(type instanceof WildcardType){
-      WildcardType sampleType = (WildcardType) type;
-        Type[] lowerBounds = sampleType.getLowerBounds();
-        Type[] upperBounds = sampleType.getUpperBounds();
-        if(lowerBounds.length != 0){
-          resultClass = (Class<?>) lowerBounds[0];
-        } else if(upperBounds.length != 0){
-          resultClass = (Class<?>) upperBounds[0];
-        } 
-      }
-      return resultClass;
+        Class<?> resultClass = null;
+        if ( type instanceof WildcardType ) {
+            WildcardType sampleType = (WildcardType) type;
+            Type[] lowerBounds = sampleType.getLowerBounds();
+            Type[] upperBounds = sampleType.getUpperBounds();
+            if ( lowerBounds.length != 0 ) {
+                resultClass = (Class<?>) lowerBounds[0];
+            } else if ( upperBounds.length != 0 ) {
+                resultClass = (Class<?>) upperBounds[0];
+            }
+        }
+        return resultClass;
     }
 
     private Object getCurrentObject(ITestContext iTestContext) {

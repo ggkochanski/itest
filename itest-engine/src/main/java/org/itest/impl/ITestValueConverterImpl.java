@@ -27,6 +27,7 @@ package org.itest.impl;
 
 import java.util.Date;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.itest.exception.ITestInitializationException;
 import org.itest.param.ITestValueConverter;
 
@@ -38,7 +39,7 @@ public class ITestValueConverterImpl implements ITestValueConverter {
         if ( null == value ) {
             res = null;
         } else if ( String.class == clazz || Object.class == clazz ) {
-            res = value;
+            res = StringEscapeUtils.unescapeJava(value);
         } else if ( Integer.class == clazz || int.class == clazz ) {
             res = Integer.valueOf(value);
         } else if ( Long.class == clazz || long.class == clazz ) {
@@ -48,6 +49,7 @@ public class ITestValueConverterImpl implements ITestValueConverter {
         } else if ( Boolean.class == clazz || boolean.class == clazz ) {
             res = Boolean.valueOf(value);
         } else if ( Character.class == clazz || char.class == clazz ) {
+            value = StringEscapeUtils.unescapeJava(value);
             if ( value.length() > 1 ) {
                 throw new ITestInitializationException("Character expected, found (" + value + ") " + value.length() + " characters.", null);
             }
