@@ -25,8 +25,7 @@
  */
 package org.itest.param;
 
-import java.util.Collection;
 
 public interface ITestParamMerger {
-    ITestParamState merge(Collection<String> transformation, Collection<ITestParamState> itestParams);
+    ITestParamState merge(ITestParamAssignment... iTestParamAssignments);
 }

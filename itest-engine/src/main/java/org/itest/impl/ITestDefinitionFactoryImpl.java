@@ -46,6 +46,7 @@ import org.itest.definition.ITestDefinitionFactory;
 import org.itest.exception.ITestException;
 import org.itest.exception.ITestParamDefinitionException;
 import org.itest.impl.util.IoUtils;
+import org.itest.param.ITestParamAssignment;
 import org.itest.param.ITestParamState;
 
 public class ITestDefinitionFactoryImpl implements ITestDefinitionFactory {
@@ -89,25 +90,27 @@ public class ITestDefinitionFactoryImpl implements ITestDefinitionFactory {
     private void define(ITestIdentifier itestIdentifier) {
         if ( null == itestDefinitionMap.get(itestIdentifier) ) {
             ITestDeclaration itestDefinition = itestMap.get(itestIdentifier);
-            Collection<String> transformations = new ArrayList<String>();
-            Collection<ITestParamState> params = new ArrayList<ITestParamState>();
+            // Collection<String> transformations = new ArrayList<String>();
+            // Collection<ITestParamState> params = new ArrayList<ITestParamState>();
+            Collection<ITestParamAssignment> iTestParamAssignments = new ArrayList<ITestParamAssignment>();
             for (ITestDependency child : itestDependencyMap.get(itestIdentifier)) {
                 ITestDefinition childPathDefintion = itestDefinitionMap.get(child.itestIdentifier);
-                transformations.add(child.transformation);
+                // transformations.add(child.transformation);
                 ITestParamState childParams;
                 if ( null == childPathDefintion ) {
                     childParams = loadParams(child.itestIdentifier);
                 } else {
                     childParams = childPathDefintion.getInitParams();
                 }
-                params.add(childParams);
+                // params.add(childParams);
+                iTestParamAssignments.add(new ITestParamAssignmentImpl(child.transformation, childParams));
             }
             if ( 0 < itestDefinition.path.init().length() ) {
-                transformations.add("");
-                params.add(parseInitParam(itestDefinition.method, itestDefinition.path.init()));
+                iTestParamAssignments.add(new ITestParamAssignmentImpl("", parseInitParam(itestDefinition.method, itestDefinition.path.init())));
             }
             Map<Class<?>, Map<String, String>> iTestStaticAssignment = toITestStaticAssignment(itestDefinition.path.assignment());
-            ITestParamState itestParams = iTestConfig.getITestParamsMerger().merge(transformations, params);
+            ITestParamAssignment[] iTestParamAssignmentsArray = iTestParamAssignments.toArray(new ITestParamAssignment[iTestParamAssignments.size()]);
+            ITestParamState itestParams = iTestConfig.getITestParamsMerger().merge(iTestParamAssignmentsArray);
             ITestDefinition res = new ITestDefinitionImpl(itestDefinition.method.getDeclaringClass(), itestDefinition.method, itestIdentifier.itestName,
                     itestParams, parseInitParam(itestDefinition.method, itestDefinition.path.verify()), new HashMap<String, Type>(), iTestStaticAssignment);
             itestDefinitionMap.put(itestIdentifier, res);

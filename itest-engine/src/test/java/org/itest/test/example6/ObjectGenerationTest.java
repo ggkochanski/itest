@@ -1,7 +1,5 @@
 package org.itest.test.example6;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -9,6 +7,7 @@ import org.itest.ITestConfig;
 import org.itest.ITestConstants;
 import org.itest.config.ITestConfigImpl;
 import org.itest.impl.ITestContextImpl;
+import org.itest.impl.ITestParamAssignmentImpl;
 import org.itest.param.ITestParamMerger;
 import org.itest.param.ITestParamParser;
 import org.itest.param.ITestParamState;
@@ -25,16 +24,12 @@ public class ObjectGenerationTest {
         ITestParamState p2 = parser.parse("T:{name:p2}");
         ITestParamState p3 = parser.parse("T:{name:p3}");
 
-        Collection<String> transformations = new ArrayList<String>();
-        Collection<ITestParamState> params = new ArrayList<ITestParamState>();
-        transformations.add("");
-        params.add(groupParams);
-        transformations.add("T:persons:0=T");
-        params.add(p1);
-        transformations.add("T:persons:1=T");
-        params.add(p2);
         ITestParamMerger merger = itestConfig.getITestParamsMerger();
-        ITestParamState mergedParams = merger.merge(transformations, params).getElement(ITestConstants.THIS);
+        ITestParamState mergedParams = merger.merge( //
+                new ITestParamAssignmentImpl("", groupParams), //
+                new ITestParamAssignmentImpl("T:persons:0=T", p1), //
+                new ITestParamAssignmentImpl("T:persons:1=T", p2) //
+                ).getElement(ITestConstants.THIS);
 
         Group g = (Group) itestConfig.getITestObjectGenerator().generate(Group.class, mergedParams, Collections.EMPTY_MAP,
                 new ITestContextImpl(Collections.EMPTY_MAP));

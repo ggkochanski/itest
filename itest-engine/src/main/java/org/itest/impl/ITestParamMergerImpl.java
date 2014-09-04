@@ -29,32 +29,29 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.StringTokenizer;
 
 import org.itest.ITestConstants;
+import org.itest.param.ITestParamAssignment;
 import org.itest.param.ITestParamMerger;
 import org.itest.param.ITestParamState;
 
 public class ITestParamMergerImpl implements ITestParamMerger {
 
     @Override
-    public ITestParamState merge(Collection<String> transformations, Collection<ITestParamState> itestParams) {
-        Collection<ITestParamState> unifiedStates = unifyStates(transformations, itestParams);
-
+    public ITestParamState merge(ITestParamAssignment... itestParamAssignments) {
+        Collection<ITestParamState> unifiedStates = unifyStates(itestParamAssignments);
         ITestParamState mergedState = mergeUnified(unifiedStates);
-
         return mergedState;
     }
 
-    private Collection<ITestParamState> unifyStates(Collection<String> transformations, Collection<ITestParamState> itestParams) {
+    private Collection<ITestParamState> unifyStates(ITestParamAssignment... iTestParamAssignments) {
         Collection<ITestParamState> unifiedStates = new ArrayList<ITestParamState>();
-        Iterator<ITestParamState> itestParamsIterator = itestParams.iterator();
-        for (String transformation : transformations) {
-            ITestParamState itestParam = itestParamsIterator.next();
+        for (ITestParamAssignment iTestParamAssignment : iTestParamAssignments) {
+            ITestParamState itestParam = iTestParamAssignment.getITestParamState();
             ITestParamStateImpl state = new ITestParamStateImpl();
-            ITestParamState thisState = getState(ITestConstants.THIS, transformation, itestParam);
-            ITestParamState argState = getState(ITestConstants.ARG, transformation, itestParam);
+            ITestParamState thisState = getState(ITestConstants.THIS, iTestParamAssignment.getTransformation(), itestParam);
+            ITestParamState argState = getState(ITestConstants.ARG, iTestParamAssignment.getTransformation(), itestParam);
             if ( null != thisState ) {
                 state.addElement(ITestConstants.THIS, thisState);
             }
