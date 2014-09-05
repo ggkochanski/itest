@@ -4,11 +4,11 @@
 	<parent>
 		<artifactId>itest</artifactId>
 		<groupId>org.itest</groupId>
-		<version>1.1.1</version>
+		<version>1.1.2-SNAPSHOT</version>
 	</parent>
 	<groupId>org.itest</groupId>
 	<artifactId>itest-engine</artifactId>
-	<version>1.1.1</version>
+	<version>1.1.2-SNAPSHOT</version>
 	<name>itest-engine</name>
 	<url>https://github.com/ggkochanski/itest/</url>
 	<dependencies>
@@ -20,17 +20,17 @@
 		<dependency>
 			<groupId>org.itest</groupId>
 			<artifactId>itest-iface</artifactId>
-			<version>1.1.1</version>
+			<version>1.1.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.itest</groupId>
 			<artifactId>itest-json-simple-parser</artifactId>
-			<version>1.1.1</version>
+			<version>1.1.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.itest</groupId>
 			<artifactId>itest-annotation</artifactId>
-			<version>1.1.1</version>
+			<version>1.1.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
