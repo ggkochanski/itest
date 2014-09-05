@@ -7,9 +7,9 @@
 	<version>1.1.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>Java Inline Test Framework</name>
+	<name>Java ITest Framework</name>
 	<description>
-		Java Inline Test Framework is designed to simplify unit testing to minimum. 
+		Java ITest Framework is designed to simplify unit testing to minimum. 
 		You define tests by providing initial data and expected result data. 
 		The test data are placed just in your source code you want to test, as java annotations.
 	</description>
