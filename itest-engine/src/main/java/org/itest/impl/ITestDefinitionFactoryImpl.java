@@ -25,8 +25,6 @@
  */
 package org.itest.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -34,18 +32,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
 import org.itest.ITestConfig;
-import org.itest.ITestConstants;
 import org.itest.annotation.ITest;
 import org.itest.annotation.ITestAssignment;
 import org.itest.annotation.ITestRef;
 import org.itest.annotation.ITests;
 import org.itest.definition.ITestDefinition;
 import org.itest.definition.ITestDefinitionFactory;
-import org.itest.exception.ITestException;
 import org.itest.exception.ITestParamDefinitionException;
-import org.itest.impl.util.IoUtils;
 import org.itest.param.ITestParamAssignment;
 import org.itest.param.ITestParamState;
 
@@ -118,25 +112,7 @@ public class ITestDefinitionFactoryImpl implements ITestDefinitionFactory {
     }
 
     private ITestParamState loadParams(ITestIdentifier itestIdentifier) {
-        String resourceName = new StringBuilder(128).append(itestIdentifier.itestClass.getName().replace('.', '/')).append(".itest").toString();
-        InputStream is = itestIdentifier.itestClass.getClassLoader().getResourceAsStream(resourceName);
-        if ( null == is ) {
-            throw new ITestException("File (" + resourceName + ") not found.");
-        }
-        String init;
-        try {
-            init = new String(IoUtils.readBytes(is, buffer));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        ITestParamState initParams = parseInitParam(null, init);
-        ITestParamState namedParams = initParams.getElement(itestIdentifier.itestName);
-        if ( null == namedParams ) {
-            throw new ITestException("Data definition for test (" + itestIdentifier.itestName + ") not found in " + resourceName);
-        }
-        ITestParamStateImpl res = new ITestParamStateImpl();
-        res.addElement(ITestConstants.THIS, namedParams);
-        return res;
+        return iTestConfig.getITestParamLoader().loadITestParam(itestIdentifier.itestClass, itestIdentifier.itestName);
     }
 
     private Map<Class<?>, Map<String, String>> toITestStaticAssignment(ITestAssignment[] assignment) {
@@ -181,17 +157,6 @@ public class ITestDefinitionFactoryImpl implements ITestDefinitionFactory {
                 }
             }
         }
-    }
-
-    private Class<?> resolveDependencyClass(Class<?> clazz, String use) {
-        String[] uses = StringUtils.split(use, '.');
-        for (int i = 0; i < uses.length - 1; i++) {
-            if ( ITestConstants.THIS.equals(uses[i]) ) {
-            } else {
-                throw new RuntimeException("Not implemented yet.");
-            }
-        }
-        return clazz;
     }
 
     static class ITestDependency {

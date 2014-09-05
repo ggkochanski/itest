@@ -28,6 +28,7 @@ package org.itest;
 import org.itest.definition.ITestDefinitionFactory;
 import org.itest.execution.ITestMethodExecutor;
 import org.itest.generator.ITestObjectGenerator;
+import org.itest.param.ITestParamLoader;
 import org.itest.param.ITestParamMerger;
 import org.itest.param.ITestParamParser;
 import org.itest.param.ITestValueConverter;
@@ -47,4 +48,6 @@ public interface ITestConfig {
     ITestParamParser getITestParamParser();
 
     ITestValueConverter getITestValueConverter();
+
+    ITestParamLoader getITestParamLoader();
 }

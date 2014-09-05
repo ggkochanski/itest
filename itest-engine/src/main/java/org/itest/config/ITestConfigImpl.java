@@ -33,9 +33,11 @@ import org.itest.impl.ITestDeclarativeObjectGeneratorImpl;
 import org.itest.impl.ITestDefinitionFactoryImpl;
 import org.itest.impl.ITestExecutionVerifierImpl;
 import org.itest.impl.ITestMethodExecutorImpl;
+import org.itest.impl.ITestParamLoaderImpl;
 import org.itest.impl.ITestParamMergerImpl;
 import org.itest.impl.ITestValueConverterImpl;
 import org.itest.json.simple.ITestSimpleJsonParamParserImpl;
+import org.itest.param.ITestParamLoader;
 import org.itest.param.ITestParamMerger;
 import org.itest.param.ITestParamParser;
 import org.itest.param.ITestValueConverter;
@@ -55,6 +57,8 @@ public class ITestConfigImpl implements ITestConfig {
     private ITestParamParser iTestParamsParser = new ITestSimpleJsonParamParserImpl();
 
     private ITestValueConverter iTestValueConverter = new ITestValueConverterImpl();
+
+    private ITestParamLoader iTestParamLoader = new ITestParamLoaderImpl(this);
 
     @Override
     public ITestDefinitionFactory getITestDefinitionFactory() {
@@ -117,5 +121,14 @@ public class ITestConfigImpl implements ITestConfig {
 
     public void setITestValueConverter(ITestValueConverter iTestValueConverter) {
         this.iTestValueConverter = iTestValueConverter;
+    }
+
+    @Override
+    public ITestParamLoader getITestParamLoader() {
+        return iTestParamLoader;
+    }
+
+    public void setITestParamLoader(ITestParamLoader iTestParamLoader) {
+        this.iTestParamLoader = iTestParamLoader;
     }
 }
