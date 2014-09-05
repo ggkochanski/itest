@@ -1,7 +1,6 @@
 package org.itest.test.example6;
 
 import java.util.Collections;
-import java.util.List;
 
 import org.itest.ITestConfig;
 import org.itest.ITestConstants;
@@ -11,6 +10,8 @@ import org.itest.impl.ITestParamAssignmentImpl;
 import org.itest.param.ITestParamMerger;
 import org.itest.param.ITestParamParser;
 import org.itest.param.ITestParamState;
+import org.itest.util.generator.ITestObjectDefinition;
+import org.itest.util.generator.ITestObjectGeneratorUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -38,13 +39,30 @@ public class ObjectGenerationTest {
         Assert.assertEquals("p2", g.persons.get(1).name);
     }
 
-    static class Group {
-        String name;
+    @Test
+    public void iTestObjectGenerationUtilTest() {
+        ITestConfig iTestConfig = new ITestConfigImpl();
+        Group g = ITestObjectGeneratorUtil.generateObject(Group.class, iTestConfig, //
+                new ITestObjectDefinition(Group.class, "empty", ""));
+        Assert.assertEquals("Empty Group", g.name);
+        Assert.assertEquals(null, g.persons);
 
-        List<Person> persons;
+        Person p = ITestObjectGeneratorUtil.generateObject(Person.class, iTestConfig, //
+                new ITestObjectDefinition(Person.class, "p2", ""));
+        Assert.assertEquals("p2", p.name);
     }
 
-    static class Person {
-        String name;
+    @Test
+    public void iTestCompositeObjectGenerationTest() {
+        ITestConfig iTestConfig = new ITestConfigImpl();
+        Group g = ITestObjectGeneratorUtil.generateObject(Group.class, iTestConfig, //
+                new ITestObjectDefinition(Group.class, "example1", ""), //
+                new ITestObjectDefinition(Person.class, "p1", "T:persons:1=T"), //
+                new ITestObjectDefinition(Person.class, "p2", "T:persons:2=T") //
+                );
+        Assert.assertEquals(3, g.persons.size());
+        Assert.assertEquals("Person 1", g.persons.get(0).name);
+        Assert.assertEquals("p1", g.persons.get(1).name);
+        Assert.assertEquals("p2", g.persons.get(2).name);
     }
 }

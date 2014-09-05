@@ -1,0 +1,7 @@
+empty:{
+	name:'Empty Group'
+},
+example1:{
+	name:'Example 1 Group',
+	persons:[{name:'Person 1'},{name:'Person 2'}]
+}
