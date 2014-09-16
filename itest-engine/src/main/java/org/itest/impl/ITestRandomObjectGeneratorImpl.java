@@ -59,6 +59,7 @@ import org.itest.exception.ITestInitializationException;
 import org.itest.exception.ITestMethodExecutionException;
 import org.itest.exception.ITestPossibleCycleException;
 import org.itest.generator.ITestObjectGenerator;
+import org.itest.impl.util.ITestUtils;
 import org.itest.param.ITestParamState;
 
 public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
@@ -294,7 +295,7 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
 
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                String mSignature = methodSignature(method, true);
+                String mSignature = ITestUtils.getMethodSingnature(method, true);
                 if ( methodResults.containsKey(mSignature) ) {
                     return methodResults.get(mSignature);
                 }
@@ -314,9 +315,9 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
         do {
             for (Method m : t.getDeclaredMethods()) {
                 if ( !Modifier.isStatic(m.getModifiers()) ) {
-                    ITestParamState mITestState = iTestState == null ? null : iTestState.getElement(methodSignature(m, true));
+                    ITestParamState mITestState = iTestState == null ? null : iTestState.getElement(ITestUtils.getMethodSingnature(m, true));
                     if ( null == mITestState ) {
-                        mITestState = iTestState == null ? null : iTestState.getElement(methodSignature(m, false));
+                        mITestState = iTestState == null ? null : iTestState.getElement(ITestUtils.getMethodSingnature(m, false));
                     }
                     fillMethod(m, res, mITestState, map, iTestContext, methodResults);
                 }
@@ -338,7 +339,7 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
 
     protected void fillMethod(Method m, Object res, ITestParamState mITestState, Map<String, Type> map, ITestContext iTestContext,
             Map<String, Object> methodResults) {
-        String mSignature = methodSignature(m, true);
+        String mSignature = ITestUtils.getMethodSingnature(m, true);
         try {
             iTestContext.enter(res, mSignature);
             Type rType = getTypeProxy(m.getGenericReturnType(), map);
@@ -354,22 +355,6 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             throw new RuntimeException(e);
         }
 
-    }
-
-    protected String methodSignature(Method m, boolean full) {
-        StringBuilder sb = new StringBuilder().append(m.getName()).append("(");
-        if ( full ) {
-            for (Class<?> clazz : m.getParameterTypes()) {
-                sb.append(clazz.getName()).append(',');
-            }
-            if ( ',' == sb.charAt(sb.length() - 1) ) {
-                sb.deleteCharAt(sb.length() - 1);
-            }
-        } else {
-            sb.append('*');
-        }
-        sb.append(")");
-        return sb.toString();
     }
 
     protected void fillFields(Class<?> clazz, Object o, ITestParamState itestState, Map<String, Type> map, ITestContext iTestContext) {

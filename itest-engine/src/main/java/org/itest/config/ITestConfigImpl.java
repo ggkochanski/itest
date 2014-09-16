@@ -26,6 +26,7 @@
 package org.itest.config;
 
 import org.itest.ITestConfig;
+import org.itest.declaration.ITestDeclarationProvider;
 import org.itest.definition.ITestDefinitionFactory;
 import org.itest.execution.ITestMethodExecutor;
 import org.itest.generator.ITestObjectGenerator;
@@ -36,6 +37,9 @@ import org.itest.impl.ITestMethodExecutorImpl;
 import org.itest.impl.ITestParamLoaderImpl;
 import org.itest.impl.ITestParamMergerImpl;
 import org.itest.impl.ITestValueConverterImpl;
+import org.itest.impl.declaration.ITestDeclarationProviderAnnotationImpl;
+import org.itest.impl.declaration.ITestDeclarationProviderCompositeImpl;
+import org.itest.impl.declaration.ITestDeclarationProviderExternalFileImpl;
 import org.itest.json.simple.ITestSimpleJsonParamParserImpl;
 import org.itest.param.ITestParamLoader;
 import org.itest.param.ITestParamMerger;
@@ -59,6 +63,9 @@ public class ITestConfigImpl implements ITestConfig {
     private ITestValueConverter iTestValueConverter = new ITestValueConverterImpl();
 
     private ITestParamLoader iTestParamLoader = new ITestParamLoaderImpl(this);
+
+    private ITestDeclarationProvider iTestDeclarationProvider = new ITestDeclarationProviderCompositeImpl(new ITestDeclarationProviderAnnotationImpl(this),
+            new ITestDeclarationProviderExternalFileImpl(this));
 
     @Override
     public ITestDefinitionFactory getITestDefinitionFactory() {
@@ -130,5 +137,14 @@ public class ITestConfigImpl implements ITestConfig {
 
     public void setITestParamLoader(ITestParamLoader iTestParamLoader) {
         this.iTestParamLoader = iTestParamLoader;
+    }
+
+    @Override
+    public ITestDeclarationProvider getITestDeclarationProvider() {
+        return iTestDeclarationProvider;
+    }
+
+    public void setITestDeclarationProvider(ITestDeclarationProvider iTestDeclarationProvider) {
+        this.iTestDeclarationProvider = iTestDeclarationProvider;
     }
 }

@@ -29,14 +29,14 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.itest.ITestConfig;
-import org.itest.annotation.ITest;
-import org.itest.annotation.ITestAssignment;
-import org.itest.annotation.ITestRef;
-import org.itest.annotation.ITests;
+import org.itest.declaration.ITest;
+import org.itest.declaration.ITestRef;
+import org.itest.declaration.ITests;
 import org.itest.definition.ITestDefinition;
 import org.itest.definition.ITestDefinitionFactory;
 import org.itest.exception.ITestParamDefinitionException;
@@ -101,15 +101,17 @@ public class ITestDefinitionFactoryImpl implements ITestDefinitionFactory {
                 // params.add(childParams);
                 iTestParamAssignments.add(new ITestParamAssignmentImpl(child.transformation, childParams));
             }
-            if ( 0 < itestDefinition.path.init().length() ) {
+            if ( null != itestDefinition.path.init() ) {
                 iTestParamAssignments.add(new ITestParamAssignmentImpl(EMPTY_TRANSFORMATION,
-                        parseInitParam(itestDefinition.method, itestDefinition.path.init())));
+                // parseInitParam(itestDefinition.method, itestDefinition.path.init())
+                        itestDefinition.path.init()));
             }
-            Map<Class<?>, Map<String, String>> iTestStaticAssignment = toITestStaticAssignment(itestDefinition.path.assignment());
+            Map<Class<?>, Map<String, String>> iTestStaticAssignment = Collections.emptyMap();// toITestStaticAssignment(itestDefinition.path.assignment());
             ITestParamAssignment[] iTestParamAssignmentsArray = iTestParamAssignments.toArray(new ITestParamAssignment[iTestParamAssignments.size()]);
             ITestParamState itestParams = iTestConfig.getITestParamsMerger().merge(iTestParamAssignmentsArray);
+
             ITestDefinition res = new ITestDefinitionImpl(itestDefinition.method.getDeclaringClass(), itestDefinition.method, itestIdentifier.itestName,
-                    itestParams, parseInitParam(itestDefinition.method, itestDefinition.path.verify()), new HashMap<String, Type>(), iTestStaticAssignment);
+                    itestParams, itestDefinition.path.verify(), new HashMap<String, Type>(), iTestStaticAssignment);
             itestDefinitionMap.put(itestIdentifier, res);
         }
     }
@@ -118,24 +120,27 @@ public class ITestDefinitionFactoryImpl implements ITestDefinitionFactory {
         return iTestConfig.getITestParamLoader().loadITestParam(itestIdentifier.itestClass, itestIdentifier.itestName);
     }
 
-    private Map<Class<?>, Map<String, String>> toITestStaticAssignment(ITestAssignment[] assignment) {
-        Map<Class<?>, Map<String, String>> assignmentMap = new HashMap<Class<?>, Map<String, String>>();
-        for (ITestAssignment iTestAssignment : assignment) {
-            Map<String, String> fieldMap = assignmentMap.get(iTestAssignment.targetClass());
-            if ( null == fieldMap ) {
-                fieldMap = new HashMap<String, String>();
-                assignmentMap.put(iTestAssignment.targetClass(), fieldMap);
-            }
-            fieldMap.put(iTestAssignment.targetField(), iTestAssignment.sourcePath());
-        }
-        return assignmentMap;
-    }
+    // TODO: check if required
+    // private Map<Class<?>, Map<String, String>> toITestStaticAssignment(ITestAssignment[] assignment) {
+    // Map<Class<?>, Map<String, String>> assignmentMap = new HashMap<Class<?>, Map<String, String>>();
+    // for (ITestAssignment iTestAssignment : assignment) {
+    // Map<String, String> fieldMap = assignmentMap.get(iTestAssignment.targetClass());
+    // if ( null == fieldMap ) {
+    // fieldMap = new HashMap<String, String>();
+    // assignmentMap.put(iTestAssignment.targetClass(), fieldMap);
+    // }
+    // fieldMap.put(iTestAssignment.targetField(), iTestAssignment.sourcePath());
+    // }
+    // return assignmentMap;
+    // }
 
     private void buildDependencies(Class<?> clazz) {
         L: for (Method method : clazz.getDeclaredMethods()) {
-            if ( method.isAnnotationPresent(ITests.class) ) {
+            ITests iTests = iTestConfig.getITestDeclarationProvider().getITestDeclaration(method);
+
+            if ( null != iTests ) {
                 int methodTestCounter = 0;
-                for (ITest path : method.getAnnotation(ITests.class).value()) {
+                for (ITest path : iTests.value()) {
                     String testName = path.name();
                     if ( 0 == testName.length() ) {
                         testName = method.getName() + "#itest" + methodTestCounter;
@@ -146,7 +151,7 @@ public class ITestDefinitionFactoryImpl implements ITestDefinitionFactory {
                         Collection<ITestDependency> col = new ArrayList<ITestDependency>();
                         itestDependencyMap.put(itestIdentifier, col);
                         for (ITestRef initRef : path.initRef()) {
-                            Class<?> refClass = initRef.useClass() == ITestRef.class ? clazz : initRef.useClass();
+                            Class<?> refClass = null == initRef.useClass() ? clazz : initRef.useClass();
                             String refTestName = initRef.use();
                             col.add(new ITestDependency(initRef.assign(), new ITestIdentifier(refClass, refTestName)));
                             if ( refClass != clazz ) {

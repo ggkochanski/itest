@@ -1,0 +1,11 @@
+sum(*):{
+	s1:{
+		init:{A:[[0,1,2,3]]},
+		verify:{R:6}
+	},
+	s2:{
+		initRef:{use:s1},
+		init:{A:{0:{4:4}}},
+		verify:{R:10}
+	}
+}

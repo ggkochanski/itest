@@ -35,6 +35,7 @@ import org.itest.test.example2.InterfaceExample;
 import org.itest.test.example3.ReuseTestDataExample;
 import org.itest.test.example4.CollectionsExample;
 import org.itest.test.example5.DataProviderExample;
+import org.itest.test.example7.ExternalTestDefinition;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -58,6 +59,6 @@ public class ITestExecutorTest {
 
     void perfomTests(ITestExecutor executor) {
         Assert.assertEquals("", executor.performTestsFor(SimpleExample.class, InterfaceExample.class, ReuseTestDataExample.class, CollectionsExample.class,
-                DataProviderExample.class));
+                DataProviderExample.class, ExternalTestDefinition.class));
     }
 }

@@ -25,6 +25,7 @@
  */
 package org.itest;
 
+import org.itest.declaration.ITestDeclarationProvider;
 import org.itest.definition.ITestDefinitionFactory;
 import org.itest.execution.ITestMethodExecutor;
 import org.itest.generator.ITestObjectGenerator;
@@ -50,4 +51,6 @@ public interface ITestConfig {
     ITestValueConverter getITestValueConverter();
 
     ITestParamLoader getITestParamLoader();
+
+    ITestDeclarationProvider getITestDeclarationProvider();
 }

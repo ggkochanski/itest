@@ -5,6 +5,7 @@ import java.io.InputStream;
 
 import org.itest.ITestConfig;
 import org.itest.ITestConstants;
+import org.itest.exception.ITestDeclarationNotFoundException;
 import org.itest.exception.ITestException;
 import org.itest.impl.util.IoUtils;
 import org.itest.param.ITestParamLoader;
@@ -27,7 +28,7 @@ public class ITestParamLoaderImpl implements ITestParamLoader {
             resourceName = new StringBuilder(128).append(iTestClass.getName().replace('.', '/')).append(".itest").toString();
             is = iTestClass.getClassLoader().getResourceAsStream(resourceName);
             if ( null == is ) {
-                throw new ITestException("File (" + resourceName + ") not found.");
+                throw new ITestDeclarationNotFoundException("File (" + resourceName + ") not found.");
             }
             namedFileFound = false;
         }
@@ -48,7 +49,7 @@ public class ITestParamLoaderImpl implements ITestParamLoader {
             initParams = initParams.getElement(use);
         }
         if ( null == initParams ) {
-            throw new ITestException("Data definition for test (" + use + ") not found in " + resourceName);
+            throw new ITestDeclarationNotFoundException("Data definition for test (" + use + ") not found in " + resourceName);
         }
         ITestParamStateImpl res = new ITestParamStateImpl();
         res.addElement(ITestConstants.THIS, initParams);
