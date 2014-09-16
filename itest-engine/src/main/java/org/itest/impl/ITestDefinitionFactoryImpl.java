@@ -51,6 +51,8 @@ public class ITestDefinitionFactoryImpl implements ITestDefinitionFactory {
 
     private final Map<ITestIdentifier, ITestDefinition> itestDefinitionMap = new HashMap<ITestIdentifier, ITestDefinition>();
 
+    private static final String[] EMPTY_TRANSFORMATION = { "" };
+
     private final ITestConfig iTestConfig;
 
     private final byte[] buffer = new byte[1024];
@@ -100,7 +102,8 @@ public class ITestDefinitionFactoryImpl implements ITestDefinitionFactory {
                 iTestParamAssignments.add(new ITestParamAssignmentImpl(child.transformation, childParams));
             }
             if ( 0 < itestDefinition.path.init().length() ) {
-                iTestParamAssignments.add(new ITestParamAssignmentImpl("", parseInitParam(itestDefinition.method, itestDefinition.path.init())));
+                iTestParamAssignments.add(new ITestParamAssignmentImpl(EMPTY_TRANSFORMATION,
+                        parseInitParam(itestDefinition.method, itestDefinition.path.init())));
             }
             Map<Class<?>, Map<String, String>> iTestStaticAssignment = toITestStaticAssignment(itestDefinition.path.assignment());
             ITestParamAssignment[] iTestParamAssignmentsArray = iTestParamAssignments.toArray(new ITestParamAssignment[iTestParamAssignments.size()]);
@@ -160,11 +163,11 @@ public class ITestDefinitionFactoryImpl implements ITestDefinitionFactory {
     }
 
     static class ITestDependency {
-        private final String transformation;
+        private final String[] transformation;
 
         private final ITestIdentifier itestIdentifier;
 
-        public ITestDependency(String transform, ITestIdentifier itestIdentifier) {
+        public ITestDependency(String[] transform, ITestIdentifier itestIdentifier) {
             this.transformation = transform;
             this.itestIdentifier = itestIdentifier;
         }

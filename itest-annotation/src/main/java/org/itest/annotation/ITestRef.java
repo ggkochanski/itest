@@ -30,5 +30,5 @@ public @interface ITestRef {
 
     String use();
 
-    String assign() default "";
+    String[] assign() default { "" };
 }

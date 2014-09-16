@@ -5,9 +5,13 @@ public class ITestObjectDefinition {
 
     private final String use;
 
-    private final String transform;
+    private final String[] transform;
 
     public ITestObjectDefinition(Class<?> clazz, String use, String transform) {
+        this(clazz, use, new String[] { transform });
+    }
+
+    public ITestObjectDefinition(Class<?> clazz, String use, String[] transform) {
         this.clazz = clazz;
         this.use = use;
         this.transform = transform;
@@ -21,7 +25,7 @@ public class ITestObjectDefinition {
         return use;
     }
 
-    public String getTransform() {
+    public String[] getTransform() {
         return transform;
     }
 }

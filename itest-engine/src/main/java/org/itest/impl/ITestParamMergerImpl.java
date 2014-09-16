@@ -49,16 +49,18 @@ public class ITestParamMergerImpl implements ITestParamMerger {
         Collection<ITestParamState> unifiedStates = new ArrayList<ITestParamState>();
         for (ITestParamAssignment iTestParamAssignment : iTestParamAssignments) {
             ITestParamState itestParam = iTestParamAssignment.getITestParamState();
-            ITestParamStateImpl state = new ITestParamStateImpl();
-            ITestParamState thisState = getState(ITestConstants.THIS, iTestParamAssignment.getTransformation(), itestParam);
-            ITestParamState argState = getState(ITestConstants.ARG, iTestParamAssignment.getTransformation(), itestParam);
-            if ( null != thisState ) {
-                state.addElement(ITestConstants.THIS, thisState);
+            for (String transformation : iTestParamAssignment.getTransformation()) {
+                ITestParamStateImpl state = new ITestParamStateImpl();
+                ITestParamState thisState = getState(ITestConstants.THIS, transformation, itestParam);
+                ITestParamState argState = getState(ITestConstants.ARG, transformation, itestParam);
+                if ( null != thisState ) {
+                    state.addElement(ITestConstants.THIS, thisState);
+                }
+                if ( null != argState ) {
+                    state.addElement(ITestConstants.ARG, argState);
+                }
+                unifiedStates.add(state);
             }
-            if ( null != argState ) {
-                state.addElement(ITestConstants.ARG, argState);
-            }
-            unifiedStates.add(state);
         }
         return unifiedStates;
     }
