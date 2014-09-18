@@ -175,7 +175,7 @@ public class ITestDeclarationProviderExternalFileImpl implements ITestDeclaratio
                     Collection<String> assignCol = new ArrayList<String>();
                     for (int i = 0;; i++) {
                         ITestParamState assignP = assignParam.getElement(String.valueOf(i));
-                        if ( null != assignP ) {
+                        if ( null == assignP ) {
                             break;
                         }
                         assignCol.add(assignP.getValue());
