@@ -58,7 +58,7 @@ public class ITestExecutorTest {
     }
 
     void perfomTests(ITestExecutor executor) {
-        Assert.assertEquals("", executor.performTestsFor(SimpleExample.class, InterfaceExample.class, ReuseTestDataExample.class, CollectionsExample.class,
+        Assert.assertEquals("", executor.performTestsFor(27, SimpleExample.class, InterfaceExample.class, ReuseTestDataExample.class, CollectionsExample.class,
                 DataProviderExample.class, ExternalTestDefinition.class));
     }
 }

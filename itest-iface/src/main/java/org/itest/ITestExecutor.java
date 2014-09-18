@@ -26,5 +26,7 @@
 package org.itest;
 
 public interface ITestExecutor {
-    String performTestsFor(Class<?>... classes);
+
+    String performTestsFor(int expectedNumberOfAssertions, Class<?>... classes);
+
 }

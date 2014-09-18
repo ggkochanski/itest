@@ -38,7 +38,7 @@ public class ITestMethodExecutionTest {
     @Test
     public void issue4Test() {
         ITestExecutor executor = ITestExecutorUtil.buildExecutor(new ITestConfigImpl());
-        Assert.assertEquals("", executor.performTestsFor(Issue4Class.class));
+        Assert.assertEquals("", executor.performTestsFor(2, Issue4Class.class));
     }
 
     public static class Issue4Class {
@@ -47,7 +47,7 @@ public class ITestMethodExecutionTest {
         int l;
 
         @ITests({ @ITest(name = "initOnly", init = "T:{l:3}"), //
-                @ITest(initRef = @ITestRef(use = "initOnly"), init = "T:{s:abc}", verify = "R:true") })
+                @ITest(initRef = @ITestRef(use = "initOnly"), init = "T:{s:abc}", verify = "R:true,T:{s:abc}") })
         public boolean m() {
             return s.length() == l;
         }

@@ -17,7 +17,7 @@ public class SimpleJsonFormatterTest {
         o.o = Arrays.asList(oc);
         oc.o = Arrays.asList(o);
         f.format(o, sb);
-        System.out.println(sb.toString());
+        // System.out.println(sb.toString());
     }
 
     class O {

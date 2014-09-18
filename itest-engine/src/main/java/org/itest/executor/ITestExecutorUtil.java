@@ -49,9 +49,10 @@ public class ITestExecutorUtil {
         }
 
         @Override
-        public String performTestsFor(Class<?>... classes) {
+        public String performTestsFor(int expectedNumberOfAssertions, Class<?>... classes) {
             Collection<ITestDefinition> iTestFlowDefinitions = itestConfig.getITestDefinitionFactory().buildTestFlowDefinitions(classes);
             StringBuilder sb = new StringBuilder();
+            int performedAsserts = 0;
             for (ITestDefinition iTestPathDefinition : iTestFlowDefinitions) {
                 try {
                     String name = iTestPathDefinition.getITestClass().getName() + "." + iTestPathDefinition.getITestName();
@@ -63,6 +64,7 @@ public class ITestExecutorUtil {
                     Collection<ITestFieldVerificationResult> verificationResult = itestConfig.getITestExecutionVerifier().verify(name, executionData,
                             iTestPathDefinition.getVeryficationParams());
                     for (ITestFieldVerificationResult res : verificationResult) {
+                        performedAsserts++;
                         if ( !res.isSuccess() ) {
                             sb.append(res).append('\n');
                         }
@@ -76,7 +78,26 @@ public class ITestExecutorUtil {
                     }
 
                 }
-
+            }
+            if ( expectedNumberOfAssertions >= 0 ) {
+                if ( expectedNumberOfAssertions > performedAsserts ) {
+                    sb.append(performedAsserts).append("/").append(expectedNumberOfAssertions);
+                    if ( 1 == expectedNumberOfAssertions - performedAsserts ) {
+                        sb.append(": There is 1 assertion missed.");
+                    } else {
+                        sb.append(": There are ").append(expectedNumberOfAssertions - performedAsserts).append(" assertions missed.");
+                    }
+                    sb.append(" It may be caused by refactoring of class name, package or method.").append(
+                            " Verify your changes with itest files and/or update expendedNumberOfAssertions in ITestExecutor.performTestsFor() if required.");
+                } else if ( expectedNumberOfAssertions < performedAsserts ) {
+                    sb.append(performedAsserts).append("/").append(expectedNumberOfAssertions);
+                    if ( 1 == performedAsserts - expectedNumberOfAssertions ) {
+                        sb.append(": It seems, there is 1 new assertion.");
+                    } else {
+                        sb.append(": It seems, there are ").append(performedAsserts - expectedNumberOfAssertions).append(" new assertions.");
+                    }
+                    sb.append(" Please update expectedNumberOfAssertions in ITestExecutor.performTestsFor() accordingly.");
+                }
             }
             return sb.toString();
         }
