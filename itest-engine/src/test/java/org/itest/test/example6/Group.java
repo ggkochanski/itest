@@ -3,8 +3,9 @@ package org.itest.test.example6;
 import java.util.List;
 
 public class Group {
-    String name;
+    public String name;
 
-    List<Person> persons;
+    public List<Person> persons;
 
+    public Group(String x){}
 }

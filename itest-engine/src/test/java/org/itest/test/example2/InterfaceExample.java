@@ -25,15 +25,17 @@
  */
 package org.itest.test.example2;
 
-import java.util.Date;
-
+import com.thoughtworks.xstream.annotations.XStreamAlias;
 import org.itest.annotation.ITest;
 import org.itest.annotation.ITestFieldClass;
 import org.itest.annotation.ITests;
 
+import java.util.Date;
+
 public class InterfaceExample {
     @ITestFieldClass(MyInterfaceImpl.class)
-    private MyInterface<Date> myInterface;
+    @XStreamAlias(value="myInterface",impl = MyInterfaceImpl.class)
+    public MyInterface<Date> myInterface;
 
     @ITests({
             @ITest(name = "dynamic interface", init = "T:{myInterface:{myInterfaceAction(*):1000}},A:[0]", verify = "R:'Thu Jan 01 01:00:01 CET 1970'"),
