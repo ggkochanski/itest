@@ -25,6 +25,21 @@
  */
 package org.itest.impl;
 
+import org.apache.commons.lang.RandomStringUtils;
+import org.itest.ITestConfig;
+import org.itest.ITestConstants;
+import org.itest.ITestContext;
+import org.itest.annotation.ITestFieldAssignment;
+import org.itest.annotation.ITestFieldClass;
+import org.itest.exception.ITestException;
+import org.itest.exception.ITestIllegalArgumentException;
+import org.itest.exception.ITestInitializationException;
+import org.itest.exception.ITestMethodExecutionException;
+import org.itest.exception.ITestPossibleCycleException;
+import org.itest.generator.ITestObjectGenerator;
+import org.itest.impl.util.ITestUtils;
+import org.itest.param.ITestParamState;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -40,27 +55,14 @@ import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-
-import org.apache.commons.lang.RandomStringUtils;
-import org.itest.ITestConfig;
-import org.itest.ITestConstants;
-import org.itest.ITestContext;
-import org.itest.annotation.ITestFieldAssignment;
-import org.itest.annotation.ITestFieldClass;
-import org.itest.exception.ITestException;
-import org.itest.exception.ITestIllegalArgumentException;
-import org.itest.exception.ITestInitializationException;
-import org.itest.exception.ITestMethodExecutionException;
-import org.itest.exception.ITestPossibleCycleException;
-import org.itest.generator.ITestObjectGenerator;
-import org.itest.impl.util.ITestUtils;
-import org.itest.param.ITestParamState;
+import java.util.TreeSet;
 
 public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
     private static final int MAX_DEPTH = 20;
@@ -78,6 +80,13 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
     private static int RANDOM_MIN = 2;
 
     private final ITestConfig iTestConfig;
+
+    private Comparator<? super FieldHolder> fieldComparator = new Comparator<FieldHolder>() {
+        @Override
+        public int compare(FieldHolder o1, FieldHolder o2) {
+            return -1;
+        }
+    };
 
     public ITestRandomObjectGeneratorImpl(ITestConfig iTestConfig) {
         this.iTestConfig = iTestConfig;
@@ -361,11 +370,34 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
         if ( iTestContext.depth() > MAX_DEPTH ) {
             throw new ITestPossibleCycleException("Possible cycle detected.");
         }
+        Collection<FieldHolder> fieldHolders = collectFields(clazz, map);
+        for (FieldHolder f : fieldHolders) {
+            fillField(f.field, o, itestState == null ? null : itestState.getElement(f.field.getName()), f.map, iTestContext);
+        }
+    }
+
+    protected Comparator<? super FieldHolder> getFieldComparator() {
+        return fieldComparator;
+    }
+
+    private class FieldHolder {
+        private Field field;
+
+        private Map<String, Type> map;
+
+        public FieldHolder(Field field, Map<String, Type> map) {
+            this.field = field;
+            this.map = map;
+        }
+    }
+
+    private Collection<FieldHolder> collectFields(Class<?> clazz, Map<String, Type> map) {
+        Collection<FieldHolder> res = new TreeSet<FieldHolder>(getFieldComparator());
         Class<?> t = clazz;
         do {
             for (Field f : t.getDeclaredFields()) {
                 if ( !Modifier.isStatic(f.getModifiers()) && !"this$0".equals(f.getName()) ) {
-                    fillField(f, o, itestState == null ? null : itestState.getElement(f.getName()), map, iTestContext);
+                    res.add(new FieldHolder(f, map));
                 }
             }
             if ( clazz.getGenericSuperclass() instanceof ParameterizedType ) {
@@ -379,6 +411,8 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
                 map = map2;
             }
         } while ((t = t.getSuperclass()) != null);
+
+        return res;
     }
 
     protected void fillField(Field f, Object o, ITestParamState fITestState, Map<String, Type> map, ITestContext iTestContext) {

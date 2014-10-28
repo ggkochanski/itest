@@ -21,7 +21,8 @@ public class ITestParamLoaderImpl implements ITestParamLoader {
 
     @Override
     public ITestParamState loadITestParam(Class<?> iTestClass, String use) {
-        String resourceName = new StringBuilder(128).append(iTestClass.getName().replace('.', '/')).append('.').append(use).append(".itest").toString();
+
+        String resourceName = resourceName(iTestClass, use);
         boolean namedFileFound = true;
         InputStream is = iTestClass.getClassLoader().getResourceAsStream(resourceName);
         if ( null == is ) {
@@ -54,5 +55,10 @@ public class ITestParamLoaderImpl implements ITestParamLoader {
         ITestParamStateImpl res = new ITestParamStateImpl();
         res.addElement(ITestConstants.THIS, initParams);
         return res;
+    }
+
+    public static String resourceName(Class<?> iTestClass, String name) {
+        return new StringBuilder(128).append(iTestClass.getName().replace('.', '/')).append('.').append(name).append(".itest").toString();
+
     }
 }

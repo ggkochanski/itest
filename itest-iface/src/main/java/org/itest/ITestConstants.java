@@ -41,4 +41,6 @@ public interface ITestConstants {
     String NULL = "null";
 
     String DYNAMIC = "D";
+
+    String REFERENCE_ATTRIBUTE = "ref";
 }

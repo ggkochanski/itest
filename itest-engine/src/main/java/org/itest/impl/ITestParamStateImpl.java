@@ -1,14 +1,17 @@
 package org.itest.impl;
 
+import org.itest.param.ITestParamState;
+
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.itest.param.ITestParamState;
 
 public class ITestParamStateImpl implements ITestParamState {
     protected Map<String, ITestParamState> elements;
 
     String value;
+
+    private Map<String, String> attributes;
 
     @Override
     public Integer getSizeParam() {
@@ -35,6 +38,15 @@ public class ITestParamStateImpl implements ITestParamState {
     @Override
     public String getValue() {
         return value;
+    }
+
+    @Override
+    public Map<String, String> getAttributes() {
+        return null == attributes ? emptyMap() : attributes;
+    }
+
+    private static Map<String, String> emptyMap() {
+        return Collections.emptyMap();
     }
 
     @Override

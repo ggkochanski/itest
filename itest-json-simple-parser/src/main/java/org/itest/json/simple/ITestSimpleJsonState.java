@@ -25,17 +25,20 @@
  */
 package org.itest.json.simple;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.itest.json.simple.impl.SimpleJsonState;
 import org.itest.param.ITestParamState;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ITestSimpleJsonState implements ITestParamState {
 
     private String value;
 
     private Map<String, ITestSimpleJsonState> elements;
+
+    private Map<String, String> attributes;
 
     public ITestSimpleJsonState(SimpleJsonState simpleJsonState) {
         Iterable<String> i = simpleJsonState.names();
@@ -45,13 +48,26 @@ public class ITestSimpleJsonState implements ITestParamState {
             elements = new HashMap<String, ITestSimpleJsonState>();
             for (String key : i) {
                 SimpleJsonState element = simpleJsonState.get(key);
-                ITestSimpleJsonState state = null;
-                if ( null != element ) {
-                    state = new ITestSimpleJsonState(element);
+                if ( key.startsWith("@") ) {
+                    addAttribute(key.substring(1), element.getValue());
+                } else if ( "#value".equals(key) ) {
+                    this.value = element.getValue();
+                } else {
+                    ITestSimpleJsonState state = null;
+                    if ( null != element ) {
+                        state = new ITestSimpleJsonState(element);
+                    }
+                    elements.put(key, state);
                 }
-                elements.put(key, state);
             }
         }
+    }
+
+    private void addAttribute(String key, String value) {
+        if ( null == attributes ) {
+            attributes = new HashMap<String, String>();
+        }
+        attributes.put(key, value);
     }
 
     @Override
@@ -72,6 +88,15 @@ public class ITestSimpleJsonState implements ITestParamState {
     @Override
     public String getValue() {
         return value;
+    }
+
+    @Override
+    public Map<String, String> getAttributes() {
+        return null == attributes ? emptyMap() : attributes;
+    }
+
+    private static Map<String, String> emptyMap() {
+        return Collections.emptyMap();
     }
 
 }
