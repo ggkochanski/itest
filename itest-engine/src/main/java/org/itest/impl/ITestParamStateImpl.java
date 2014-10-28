@@ -13,13 +13,35 @@ public class ITestParamStateImpl implements ITestParamState {
 
     private Map<String, String> attributes;
 
+    public ITestParamStateImpl(){}
+    public ITestParamStateImpl(ITestParamState paramState) {
+        this.value = paramState.getValue();
+        Iterable<String> paramNames = paramState.getNames();
+        if (null != paramNames) {
+            for (String paramName : paramNames) {
+                addElement(paramName, paramState.getElement(paramName));
+            }
+        }
+
+        for(Map.Entry<String,String>entry:paramState.getAttributes().entrySet()){
+            addAttribute(entry.getKey(),entry.getValue());
+        }
+    }
+
+    private void addAttribute(String key, String value) {
+        if(null==attributes){
+            attributes=new HashMap<String, String>();
+        }
+        attributes.put(key,value);
+    }
+
     @Override
     public Integer getSizeParam() {
         return null == elements ? null : elements.size();
     }
 
     public void addElement(String token, ITestParamState iTestParamsImpl) {
-        if ( null == elements ) {
+        if (null == elements) {
             elements = new HashMap<String, ITestParamState>();
         }
         elements.put(token, iTestParamsImpl);
@@ -52,7 +74,7 @@ public class ITestParamStateImpl implements ITestParamState {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        if ( null == elements ) {
+        if (null == elements) {
             sb.append(":").append(getValue());
         } else {
             sb.append(elements);

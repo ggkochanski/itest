@@ -25,8 +25,6 @@
  */
 package org.itest.test;
 
-import java.util.Collections;
-
 import org.itest.ITestContext;
 import org.itest.config.ITestConfigImpl;
 import org.itest.impl.ITestContextImpl;
@@ -37,14 +35,17 @@ import org.itest.param.ITestParamState;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Collections;
+
 public class ITestRandomObjectImplTest {
     @Test
     public void generateTest() {
         ITestRandomObjectGeneratorImpl g = new ITestRandomObjectGeneratorImpl(new ITestConfigImpl());
         ITestParamParser parser = new ITestSimpleJsonParamParserImpl();
         ITestParamState params = parser.parse("'arg':[{'name':'name1','classes':[{},{'name':'class1'},{},{}]}]");
-        ITestContext ctx = new ITestContextImpl(Collections.EMPTY_MAP);
-        Person person = (Person) g.generate(Person.class, params.getElement("arg").getElement(String.valueOf(0)), null, ctx);
+        ITestParamState p=params.getElement("arg").getElement(String.valueOf(0));
+        ITestContext ctx = new ITestContextImpl(p,Collections.EMPTY_MAP);
+        Person person = (Person) g.generate(Person.class, p, null, ctx);
         Assert.assertEquals("name1", person.name);
         Assert.assertEquals(4, person.classes.length);
         Assert.assertEquals("class1", person.classes[1].name);

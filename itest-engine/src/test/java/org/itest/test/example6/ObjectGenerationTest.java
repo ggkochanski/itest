@@ -1,7 +1,5 @@
 package org.itest.test.example6;
 
-import java.util.Collections;
-
 import org.itest.ITestConfig;
 import org.itest.ITestConstants;
 import org.itest.config.ITestConfigImpl;
@@ -14,6 +12,8 @@ import org.itest.util.generator.ITestObjectDefinition;
 import org.itest.util.generator.ITestObjectGeneratorUtil;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.Collections;
 
 public class ObjectGenerationTest {
     @Test
@@ -33,7 +33,7 @@ public class ObjectGenerationTest {
                 ).getElement(ITestConstants.THIS);
 
         Group g = (Group) itestConfig.getITestObjectGenerator().generate(Group.class, mergedParams, Collections.EMPTY_MAP,
-                new ITestContextImpl(Collections.EMPTY_MAP));
+                new ITestContextImpl(mergedParams,Collections.EMPTY_MAP));
         Assert.assertEquals("g1", g.name);
         Assert.assertEquals(2, g.persons.size());
         Assert.assertEquals("p2", g.persons.get(1).name);

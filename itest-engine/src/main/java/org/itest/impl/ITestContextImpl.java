@@ -1,19 +1,19 @@
 /**
  * <pre>
  * The MIT License (MIT)
- * 
+ *
  * Copyright (c) 2014 Grzegorz Kochański
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,26 +25,27 @@
  */
 package org.itest.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.lang.StringUtils;
 import org.itest.ITestConstants;
 import org.itest.ITestContext;
+import org.itest.param.ITestParamState;
+
+import java.util.*;
 
 public class ITestContextImpl implements ITestContext {
     private final List<String> path = new ArrayList<String>();
 
     private final List<Object> owners = new ArrayList<Object>();
 
+    private final List<ITestParamState> params = new ArrayList<ITestParamState>();
     private final Map<List<String>, List<String>> assignments = new HashMap<List<String>, List<String>>();
 
     private final Map<Class<?>, Map<String, String>> staticITestAssignmentMap;
+    private final ITestParamState rootParam;
 
-    public ITestContextImpl(Map<Class<?>, Map<String, String>> staticITestAssignmentMap) {
+    public ITestContextImpl(ITestParamState rootParam, Map<Class<?>, Map<String, String>> staticITestAssignmentMap) {
+        this.rootParam = rootParam;
+        this.params.add(rootParam);
         this.staticITestAssignmentMap = staticITestAssignmentMap;
     }
 
@@ -57,12 +58,12 @@ public class ITestContextImpl implements ITestContext {
         List<String> res = new ArrayList<String>(path);
         for (int i = 0; i < sourcePath.size(); i++) {
             String s = sourcePath.get(i);
-            if ( 0 == i ) {
-                if ( ITestConstants.ARG.equals(s) || ITestConstants.THIS.equals(s) || ITestConstants.NULL.equals(s) ) {
+            if (0 == i) {
+                if (ITestConstants.ARG.equals(s) || ITestConstants.THIS.equals(s) || ITestConstants.NULL.equals(s)) {
                     res.clear();
                 }
             }
-            if ( ITestConstants.OWNER.equals(s) ) {
+            if (ITestConstants.OWNER.equals(s)) {
                 res.remove(res.size() - 1);
             } else {
                 res.add(s);
@@ -88,12 +89,18 @@ public class ITestContextImpl implements ITestContext {
 
     @Override
     public void enter(Object owner, String field) {
+        params.add(null==getCurrentParam()?null:getCurrentParam().getElement(field));
         path.add(field);
         owners.add(owner);
     }
-
+    public void enterEmpty(){
+        params.add(ITestRandomObjectGeneratorImpl.EMPTY_STATE);
+        path.add("_");
+        owners.add(null);
+    }
     @Override
-    public void leave() {
+    public void leave(Object constructorArg) {
+        params.remove(params.size()-1);
         path.remove(path.size() - 1);
         owners.remove(owners.size() - 1);
     }
@@ -124,4 +131,7 @@ public class ITestContextImpl implements ITestContext {
         return path.get(path.size() - 1);
     }
 
+    public ITestParamState getCurrentParam() {
+        return params.get(params.size() - 1);
+    }
 }

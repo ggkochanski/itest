@@ -25,18 +25,6 @@
  */
 package org.itest.impl;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.itest.ITestConfig;
 import org.itest.ITestConstants;
 import org.itest.ITestContext;
@@ -47,6 +35,13 @@ import org.itest.execution.ITestMethodExecutionResult;
 import org.itest.execution.ITestMethodExecutor;
 import org.itest.param.ITestParamState;
 import org.itest.verify.ITestFieldVerificationResult;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.*;
 
 public class ITestMethodExecutorImpl implements ITestMethodExecutor {
     private final ITestConfig iTestConfig;
@@ -59,17 +54,17 @@ public class ITestMethodExecutorImpl implements ITestMethodExecutor {
     public ITestMethodExecutionResult execute(ITestDefinition itestPathDefinition) throws InvocationTargetException {
         Class<?> clazz = itestPathDefinition.getITestClass();
         Method method = itestPathDefinition.getITestMethod();
-        ITestParamState initStateParam = itestPathDefinition.getInitParams().getElement(ITestConstants.THIS);
-        if ( null == initStateParam ) {
-            initStateParam = ITestRandomObjectGeneratorImpl.EMPTY_STATE;
-        }
+
+        ITestParamState paramState = itestPathDefinition.getInitParams();
+        paramState=addElementIfMissing(paramState, ITestConstants.THIS, ITestRandomObjectGeneratorImpl.EMPTY_STATE);
+
         Map<String, Type> itestGenericMap = itestPathDefinition.getITestGenericMap();
         Map<Class<?>, Map<String, String>> staticAssignments = itestPathDefinition.getITestStaticAssignments();
-        ITestContext iTestContext = new ITestContextImpl(itestPathDefinition.getITestStaticAssignments());
+        ITestContext iTestContext = new ITestContextImpl(paramState,itestPathDefinition.getITestStaticAssignments());
         ITestMethodExecutionResult itestData = new ITestMethodExecutionResult();
         iTestContext.enter(itestData, ITestConstants.THIS);
-        Object itestObject = iTestConfig.getITestObjectGenerator().generate(clazz, initStateParam, itestGenericMap, iTestContext);
-        iTestContext.leave();
+        Object itestObject = iTestConfig.getITestObjectGenerator().generate(clazz, paramState.getElement(ITestConstants.THIS), itestGenericMap, iTestContext);
+        iTestContext.leave(itestObject);
         itestData.T = itestObject;
 
         Type parameterTypes[] = method.getGenericParameterTypes();
@@ -77,18 +72,18 @@ public class ITestMethodExecutorImpl implements ITestMethodExecutor {
         itestData.A = parameters;
         iTestContext.enter(itestData, ITestConstants.ARG);
         for (int i = 0; i < parameterTypes.length; i++) {
-            ITestParamState argState = itestPathDefinition.getInitParams().getElement(ITestConstants.ARG);
+            ITestParamState argState = paramState.getElement(ITestConstants.ARG);
             try {
                 iTestContext.enter(parameters, String.valueOf(i));
                 parameters[i] = iTestConfig.getITestObjectGenerator().generate(parameterTypes[i],
                         argState == null ? null : argState.getElement(String.valueOf(i)), itestGenericMap, iTestContext);
-                iTestContext.leave();
+                iTestContext.leave(parameters[i]);
             } catch (ITestException e) {
                 e.addPrefix(method + " arg[" + i + "]: ");
                 throw e;
             }
         }
-        iTestContext.leave();
+        iTestContext.leave(itestData.A);
         // performAssignments(new ITestData(itestObject, parameters), iTestContext.getAssignments());
 
         try {
@@ -101,6 +96,15 @@ public class ITestMethodExecutorImpl implements ITestMethodExecutor {
         } catch (Exception e) {
             throw new ITestMethodExecutionException("Error invoking method:" + method, e);
         }
+    }
+
+    private ITestParamState addElementIfMissing(ITestParamState paramState, String elementName, ITestParamState emptyState) {
+        if(null==paramState.getElement(elementName)){
+            ITestParamStateImpl newParamState=new ITestParamStateImpl(paramState);
+            newParamState.addElement(elementName,emptyState);
+            paramState=newParamState;
+        }
+        return paramState;
     }
 
     private void performAssignments(ITestMethodExecutionResult iTestData, Map<List<String>, List<String>> assignments) {
