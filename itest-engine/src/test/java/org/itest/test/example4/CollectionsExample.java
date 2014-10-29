@@ -25,12 +25,12 @@
  */
 package org.itest.test.example4;
 
-import java.util.List;
-import java.util.Map;
-
 import org.itest.annotation.ITest;
 import org.itest.annotation.ITestRef;
 import org.itest.annotation.ITests;
+
+import java.util.List;
+import java.util.Map;
 
 public class CollectionsExample {
     private long[] array;
@@ -41,7 +41,7 @@ public class CollectionsExample {
 
     @ITests({ @ITest(name = "arrayInit", init = "T:{array:[1,2,3]}"),
             @ITest(name = "verify1stElement", initRef = @ITestRef(use = "arrayInit"), verify = "T:{array:[1]}"),
-            @ITest(name = "verify2stElement", initRef = @ITestRef(use = "arrayInit"), verify = "T:{array:[{},2]}") })
+            @ITest(name = "verify2ndElement", initRef = @ITestRef(use = "arrayInit"), verify = "T:{array:[{},2]}") })
     public int getArrayLength() {
         return array.length;
     }

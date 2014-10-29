@@ -25,8 +25,6 @@
  */
 package org.itest.param;
 
-import java.util.Map;
-
 public interface ITestParamState {
 
     Integer getSizeParam();
@@ -37,5 +35,7 @@ public interface ITestParamState {
 
     String getValue();
 
-    Map<String, String> getAttributes();
+    String getAttribute(String name);
+
+    Iterable<String> getAttributeNames();
 }

@@ -36,6 +36,7 @@ import org.itest.test.example3.ReuseTestDataExample;
 import org.itest.test.example4.CollectionsExample;
 import org.itest.test.example5.DataProviderExample;
 import org.itest.test.example7.ExternalTestDefinition;
+import org.itest.test.example8.ReferenceExample;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -50,6 +51,14 @@ public class ITestExecutorTest {
     }
 
     @Test
+    public void single() {
+        ITestConfigImpl iTestConfigImpl = new ITestConfigImpl();
+        iTestConfigImpl.setITestObjectGenerator(new ITestRandomObjectGeneratorImpl(iTestConfigImpl));
+        ITestExecutor executor = ITestExecutorUtil.buildExecutor(iTestConfigImpl);
+        Assert.assertEquals("", executor.performTestsFor(1, ReferenceExample.class));
+    }
+
+    @Test
     public void declarativeObjectGeneratorTest() {
         ITestConfigImpl iTestConfigImpl = new ITestConfigImpl();
         iTestConfigImpl.setITestObjectGenerator(new ITestDeclarativeObjectGeneratorImpl(iTestConfigImpl));
@@ -58,7 +67,7 @@ public class ITestExecutorTest {
     }
 
     void perfomTests(ITestExecutor executor) {
-        Assert.assertEquals("", executor.performTestsFor(27, SimpleExample.class, InterfaceExample.class, ReuseTestDataExample.class, CollectionsExample.class,
-                DataProviderExample.class, ExternalTestDefinition.class));
+        Assert.assertEquals("", executor.performTestsFor(28, SimpleExample.class, InterfaceExample.class, ReuseTestDataExample.class, CollectionsExample.class,
+                DataProviderExample.class, ExternalTestDefinition.class, ReferenceExample.class));
     }
 }

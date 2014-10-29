@@ -30,6 +30,7 @@ import org.itest.param.ITestParamState;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ITestSimpleJsonState implements ITestParamState {
@@ -45,7 +46,6 @@ public class ITestSimpleJsonState implements ITestParamState {
         if ( null == i ) {
             this.value = simpleJsonState.getValue();
         } else {
-            elements = new HashMap<String, ITestSimpleJsonState>();
             for (String key : i) {
                 SimpleJsonState element = simpleJsonState.get(key);
                 if ( key.startsWith("@") ) {
@@ -56,6 +56,9 @@ public class ITestSimpleJsonState implements ITestParamState {
                     ITestSimpleJsonState state = null;
                     if ( null != element ) {
                         state = new ITestSimpleJsonState(element);
+                    }
+                    if ( null == elements ) {
+                        elements = new LinkedHashMap<String, ITestSimpleJsonState>();
                     }
                     elements.put(key, state);
                 }
@@ -91,8 +94,12 @@ public class ITestSimpleJsonState implements ITestParamState {
     }
 
     @Override
-    public Map<String, String> getAttributes() {
-        return null == attributes ? emptyMap() : attributes;
+    public String getAttribute(String name) {
+        return null == attributes ? null : attributes.get(name);
+    }
+
+    public Iterable<String> getAttributeNames() {
+        return null == attributes ? null : attributes.keySet();
     }
 
     private static Map<String, String> emptyMap() {

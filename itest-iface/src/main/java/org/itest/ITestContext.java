@@ -53,4 +53,6 @@ public interface ITestContext {
     ITestParamState getCurrentParam();
 
     void setEmptyParam();
+
+    Object findGeneratedObject(String path);
 }

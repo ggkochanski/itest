@@ -30,13 +30,15 @@ public interface ITestConstants {
 
     String ARG = "A";
 
-    String OWNER = "O";
+    String PARENT = "..";
 
     String RESULT = "R";
 
     String ASSIGN = "=";
 
     String ASSIGN_SEPARATOR = ":";
+
+    String SEPARATOR = "/";
 
     String NULL = "null";
 

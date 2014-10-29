@@ -25,16 +25,16 @@
  */
 package org.itest.impl;
 
+import org.itest.ITestConstants;
+import org.itest.param.ITestParamAssignment;
+import org.itest.param.ITestParamMerger;
+import org.itest.param.ITestParamState;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.StringTokenizer;
-
-import org.itest.ITestConstants;
-import org.itest.param.ITestParamAssignment;
-import org.itest.param.ITestParamMerger;
-import org.itest.param.ITestParamState;
 
 public class ITestParamMergerImpl implements ITestParamMerger {
 
@@ -66,6 +66,9 @@ public class ITestParamMergerImpl implements ITestParamMerger {
     }
 
     private ITestParamState mergeUnified(Collection<ITestParamState> unifiedStates) {
+        if ( 1 == unifiedStates.size() ) {
+            return unifiedStates.iterator().next();
+        }
         ITestParamStateImpl mergedState = new ITestParamStateImpl();
         merge(ITestConstants.THIS, mergedState, unifiedStates);
         merge(ITestConstants.ARG, mergedState, unifiedStates);
@@ -82,6 +85,7 @@ public class ITestParamMergerImpl implements ITestParamMerger {
         if ( null != allNamesIterable ) {
             currentState = new ITestParamStateImpl();
             currentState.elements = new HashMap<String, ITestParamState>();
+            copyAttributes(currentState, unifiedElements);
             parentState.addElement(name, currentState);
             for (String elementName : allNamesIterable) {
                 merge(elementName, currentState, unifiedElements);
@@ -94,6 +98,20 @@ public class ITestParamMergerImpl implements ITestParamMerger {
                         parentState.addElement(name, currentState);
                     }
                     currentState.value = itestState.getValue();
+                }
+            }
+        }
+    }
+
+    private void copyAttributes(ITestParamStateImpl currentState, Collection<ITestParamState> unifiedElements) {
+        for (ITestParamState unified : unifiedElements) {
+            if ( null == unified ) {
+                continue;
+            }
+            Iterable<String> attributeNames = unified.getAttributeNames();
+            if ( null != attributeNames ) {
+                for (String attributeName : attributeNames) {
+                    currentState.addAttribute(attributeName, unified.getAttribute(attributeName));
                 }
             }
         }

@@ -4,6 +4,7 @@ import org.itest.param.ITestParamState;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ITestParamStateImpl implements ITestParamState {
@@ -22,13 +23,15 @@ public class ITestParamStateImpl implements ITestParamState {
                 addElement(paramName, paramState.getElement(paramName));
             }
         }
-
-        for(Map.Entry<String,String>entry:paramState.getAttributes().entrySet()){
-            addAttribute(entry.getKey(),entry.getValue());
+        Iterable<String> attributeNames = paramState.getAttributeNames();
+        if ( null != attributeNames ) {
+            for (String attributeName : attributeNames) {
+                addAttribute(attributeName, paramState.getAttribute(attributeName));
+            }
         }
     }
 
-    private void addAttribute(String key, String value) {
+    public void addAttribute(String key, String value) {
         if(null==attributes){
             attributes=new HashMap<String, String>();
         }
@@ -42,7 +45,7 @@ public class ITestParamStateImpl implements ITestParamState {
 
     public void addElement(String token, ITestParamState iTestParamsImpl) {
         if (null == elements) {
-            elements = new HashMap<String, ITestParamState>();
+            elements = new LinkedHashMap<String, ITestParamState>();
         }
         elements.put(token, iTestParamsImpl);
     }
@@ -63,8 +66,12 @@ public class ITestParamStateImpl implements ITestParamState {
     }
 
     @Override
-    public Map<String, String> getAttributes() {
-        return null == attributes ? emptyMap() : attributes;
+    public String getAttribute(String name) {
+        return null == attributes ? null : attributes.get(name);
+    }
+
+    public Iterable<String> getAttributeNames() {
+        return null == attributes ? null : attributes.keySet();
     }
 
     private static Map<String, String> emptyMap() {

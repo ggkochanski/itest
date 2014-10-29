@@ -84,7 +84,7 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
     private Comparator<? super FieldHolder> fieldComparator = new Comparator<FieldHolder>() {
         @Override
         public int compare(FieldHolder o1, FieldHolder o2) {
-            return -1;
+            return o1.field.getName().compareTo(o2.field.getName());
         }
     };
 
@@ -220,9 +220,8 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             }
             if (null != iTestState && null == iTestState.getNames()) {
                 String path;
-                if (null != iTestState.getValue() && (path = iTestState.getValue()).startsWith(":")) {
-                    iTestContext.registerAssignment(path.substring(1));
-                    res = null;// temporary null, will be set at postProcess
+                if ( null != iTestState.getAttribute(ITestConstants.REFERENCE_ATTRIBUTE) ) {
+                    res = iTestContext.findGeneratedObject(iTestState.getAttribute(ITestConstants.REFERENCE_ATTRIBUTE));
                 } else {
                     res = iTestConfig.getITestValueConverter().convert(clazz, iTestState.getValue());
                 }
@@ -360,7 +359,7 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             Type rType = getTypeProxy(m.getGenericReturnType(), map);
             Object o = generateRandom(rType, map, iTestContext);
             methodResults.put(ITestUtils.getMethodSingnature(m, true), o);
-            iTestContext.leave(mSignature);
+            iTestContext.leave(o);
         } catch (ITestException e) {
             e.addPrefix(mSignature);
             throw e;
@@ -430,7 +429,10 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             ITestParamState fITestState = iTestContext.getCurrentParam();
             String fITestValue = fITestState == null ? null : fITestState.getValue();
             Object oRes;
-            if (null == fITestState && iTestContext.isStaticAssignmentRegistered(o.getClass(), f.getName())) {
+            // if ( fITestState != null && null != fITestState.getAttribute(ITestConstants.REFERENCE_ATTRIBUTE) ) {
+            // oRes = iTestContext.findGeneratedObject(fITestState.getAttribute(ITestConstants.REFERENCE_ATTRIBUTE));
+            // } else
+            if ( null == fITestState && iTestContext.isStaticAssignmentRegistered(o.getClass(), f.getName()) ) {
                 iTestContext.registerAssignment(o.getClass(), f.getName());
                 oRes=null;//TODO: implement it
             } else if (null == fITestState && f.isAnnotationPresent(ITestFieldAssignment.class)) {
@@ -452,6 +454,7 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
                 oRes = generateRandom(fType, map, iTestContext);
                 f.set(o, oRes);
             }
+            f.set(o, oRes);
             iTestContext.leave(oRes);
         } catch (ITestException e) {
             e.addPrefix(f.getName());
@@ -497,7 +500,7 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             Object value = generateRandom(((ParameterizedType) type).getActualTypeArguments()[1], map, iTestContext);
             iTestContext.leave(value);
             m.put(key, value);
-            iTestContext.leave(m);
+            iTestContext.leave("Map.Entry");
         }
         return m;
     }
