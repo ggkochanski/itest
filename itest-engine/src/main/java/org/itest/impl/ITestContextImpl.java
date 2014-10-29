@@ -30,7 +30,11 @@ import org.itest.ITestConstants;
 import org.itest.ITestContext;
 import org.itest.param.ITestParamState;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ITestContextImpl implements ITestContext {
     private final List<String> path = new ArrayList<String>();
@@ -93,11 +97,11 @@ public class ITestContextImpl implements ITestContext {
         path.add(field);
         owners.add(owner);
     }
-    public void enterEmpty(){
-        params.add(ITestRandomObjectGeneratorImpl.EMPTY_STATE);
-        path.add("_");
-        owners.add(null);
+
+    public void setEmptyParam() {
+        params.set(params.size() - 1, ITestRandomObjectGeneratorImpl.EMPTY_STATE);
     }
+
     @Override
     public void leave(Object constructorArg) {
         params.remove(params.size()-1);

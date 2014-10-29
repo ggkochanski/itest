@@ -52,5 +52,5 @@ public interface ITestContext {
 
     ITestParamState getCurrentParam();
 
-    void enterEmpty();
+    void setEmptyParam();
 }

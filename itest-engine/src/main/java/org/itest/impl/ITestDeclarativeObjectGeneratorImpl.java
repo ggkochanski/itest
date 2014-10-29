@@ -25,16 +25,16 @@
  */
 package org.itest.impl;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.Map;
-
 import org.itest.ITestConfig;
 import org.itest.ITestContext;
 import org.itest.annotation.ITestFieldAssignment;
 import org.itest.annotation.ITestFieldClass;
 import org.itest.param.ITestParamState;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.Map;
 
 public class ITestDeclarativeObjectGeneratorImpl extends ITestRandomObjectGeneratorImpl {
 
@@ -43,27 +43,27 @@ public class ITestDeclarativeObjectGeneratorImpl extends ITestRandomObjectGenera
     }
 
     @Override
-    public <T> T generateRandom(Class<T> clazz, ITestParamState iTestState, Map<String, Type> itestGenericMap, ITestContext iTestContext) {
-        if ( null == iTestState && !clazz.isPrimitive() ) {
+    public <T> T generateRandom(Class<T> clazz, Map<String, Type> itestGenericMap, ITestContext iTestContext) {
+        if ( null == iTestContext.getCurrentParam() && !clazz.isPrimitive() ) {
             return null;
         }
-        return super.generateRandom(clazz, iTestState, itestGenericMap, iTestContext);
+        return super.generateRandom(clazz, itestGenericMap, iTestContext);
     }
 
     @Override
-    protected Object fillCollection(Object o, Type type, ITestParamState iTestState, Map<String, Type> map, ITestContext iTestContext) {
-        if ( null == iTestState || null == iTestState.getSizeParam() ) {
+    protected Object fillCollection(Object o, Type type, Map<String, Type> map, ITestContext iTestContext) {
+        if ( null == iTestContext.getCurrentParam() || null == iTestContext.getCurrentParam().getSizeParam() ) {
             return o;
         }
-        return super.fillCollection(o, type, iTestState, map, iTestContext);
+        return super.fillCollection(o, type, map, iTestContext);
     }
 
     @Override
-    protected Object fillMap(Object o, Type type, ITestParamState iTestState, Map<String, Type> map, ITestContext iTestContext) {
-        if ( null == iTestState || null == iTestState.getSizeParam() ) {
+    protected Object fillMap(Object o, Type type, Map<String, Type> map, ITestContext iTestContext) {
+        if ( null == iTestContext.getCurrentParam() || null == iTestContext.getCurrentParam().getSizeParam() ) {
             return o;
         }
-        return super.fillMap(o, type, iTestState, map, iTestContext);
+        return super.fillMap(o, type, map, iTestContext);
     }
 
     @Override
@@ -76,11 +76,10 @@ public class ITestDeclarativeObjectGeneratorImpl extends ITestRandomObjectGenera
     }
 
     @Override
-    protected void fillMethod(Method m, Object res, ITestParamState mITestState, Map<String, Type> map, ITestContext iTestContext,
-            Map<String, Object> methodResults) {
-        if ( null == mITestState ) {
+    protected void fillMethod(Method m, Object res, String mSignature, Map<String, Type> map, ITestContext iTestContext, Map<String, Object> methodResults) {
+        if ( null == iTestContext.getCurrentParam() ) {
             return;
         }
-        super.fillMethod(m, res, mITestState, map, iTestContext, methodResults);
+        super.fillMethod(m, res, mSignature, map, iTestContext, methodResults);
     }
 }
