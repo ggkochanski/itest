@@ -218,13 +218,10 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             } else {
                 clazz = (Class<?>) ((ParameterizedType) type).getRawType();
             }
-            if (null != iTestState && null == iTestState.getNames()) {
-                String path;
-                if ( null != iTestState.getAttribute(ITestConstants.REFERENCE_ATTRIBUTE) ) {
-                    res = iTestContext.findGeneratedObject(iTestState.getAttribute(ITestConstants.REFERENCE_ATTRIBUTE));
-                } else {
-                    res = iTestConfig.getITestValueConverter().convert(clazz, iTestState.getValue());
-                }
+            if ( null!=iTestState && null != iTestState.getAttribute(ITestConstants.REFERENCE_ATTRIBUTE) ) {
+                res = iTestContext.findGeneratedObject(iTestState.getAttribute(ITestConstants.REFERENCE_ATTRIBUTE));
+            }else if (null != iTestState && null == iTestState.getNames()) {
+                res = iTestConfig.getITestValueConverter().convert(clazz, iTestState.getValue());
             } else if (null != iTestState && null != iTestState.getElement("class")
                     && ITestConstants.DYNAMIC.equals(iTestState.getElement("class").getValue())) {
                 res = newDynamicProxy(type, iTestState, itestGenericMap, iTestContext);

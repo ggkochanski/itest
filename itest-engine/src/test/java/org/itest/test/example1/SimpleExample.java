@@ -25,11 +25,11 @@
  */
 package org.itest.test.example1;
 
-import java.util.List;
-
 import org.itest.annotation.ITest;
 import org.itest.annotation.ITestRef;
 import org.itest.annotation.ITests;
+
+import java.util.List;
 
 public class SimpleExample {
     @ITests(@ITest(init = "A:[3,16]", verify = "R:19"))
