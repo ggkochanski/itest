@@ -28,6 +28,7 @@
 	<modules>
 		<module>itest-annotation</module>
 		<module>itest-iface</module>
+		<module>itest-util</module>
 		<module>itest-json-simple-parser</module>
 		<module>itest-engine</module>
 	</modules>

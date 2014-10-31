@@ -1,18 +1,26 @@
 package org.itest.json.simple.impl;
 
+import org.apache.commons.lang.ClassUtils;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.itest.util.reflection.ITestFieldUtil;
+import org.itest.util.reflection.ITestFieldUtil.FieldHolder;
+import org.itest.util.reflection.ITestTypeUtils;
+
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-
-import org.apache.commons.lang.StringEscapeUtils;
 
 public class SimpleJsonFormatter {
     public static final Comparator<Field> FIELD_NAME_COMPARATOR = new Comparator<Field>() {
@@ -27,18 +35,20 @@ public class SimpleJsonFormatter {
         try {
             List<String> stack = new ArrayList<String>();
             stack.add("T");
-            format(o, out, "\t", "\n", stack, new IdentityHashMap<Object, String>());
+            Map<String, Type> map = ITestTypeUtils.getTypeMap(o.getClass(), new HashMap<String, Type>());
+            format(o, Object.class, map, out, "\t", "\n", stack, new IdentityHashMap<Object, String>());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void format(Object o, Appendable out, String indent, String newLine, List<String> stack, Map<Object, String> visited) throws Exception {
+    private void format(Object o, Type expectedType, Map<String, Type> typeMap, Appendable out, String indent, String newLine, List<String> stack,
+            Map<Object, String> visited) throws Exception {
         if ( stack.size() > 20 ) {
             System.out.println(stack);
         }
         String path;
-        if ( formatValue(o, out) ) {
+        if ( formatValue(o, expectedType, out) ) {
 
         } else if ( null != (path = visited.get(o)) ) {
             out.append(path);
@@ -55,7 +65,8 @@ public class SimpleJsonFormatter {
                             out.append(',');
                         }
                         stack.add("[" + i + "]");
-                        format(list.get(i), out, indent, newLine, stack, visited);
+                        Type elementType = ((ParameterizedType) o.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+                        format(list.get(i), elementType, typeMap, out, indent, newLine, stack, visited);
                         stack.remove(stack.size() - 1);
                     }
                     out.append(']');
@@ -74,11 +85,13 @@ public class SimpleJsonFormatter {
                         stack.add("[" + i + "]");
                         out.append("{key:");
                         stack.add("key");
-                        format(entries.get(i).getKey(), out, indent, newLine, stack, visited);
+                        Type keyType = ((ParameterizedType) o.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+                        format(entries.get(i).getKey(), keyType, typeMap, out, indent, newLine, stack, visited);
                         stack.remove(stack.size() - 1);
                         out.append(",value:");
                         stack.add("value");
-                        format(entries.get(i).getValue(), out, indent, newLine, stack, visited);
+                        Type valueType = ((ParameterizedType) o.getClass().getGenericSuperclass()).getActualTypeArguments()[1];
+                        format(entries.get(i).getValue(), valueType, typeMap, out, indent, newLine, stack, visited);
                         out.append("}");
                         stack.remove(stack.size() - 1);
                         stack.remove(stack.size() - 1);
@@ -87,13 +100,15 @@ public class SimpleJsonFormatter {
                     out.append(']');
                 }
             } else {
-                Set<Field> fields = collectFields(o);
+                typeMap = ITestTypeUtils.getTypeMap(o.getClass(), typeMap);
+                Collection<FieldHolder> fields = ITestFieldUtil.collectFields(o.getClass(), typeMap);
                 if ( 0 == fields.size() ) {
                     out.append("{}");
                 } else {
                     out.append('{').append(newLine);
                     boolean separator = false;
-                    for (Field field : fields) {
+                    for (FieldHolder f : fields) {
+                        f.getField().setAccessible(true);
                         if ( !separator ) {
                             separator = true;
                         } else {
@@ -102,12 +117,10 @@ public class SimpleJsonFormatter {
                         for (int i = 0; i < stack.size(); i++) {
                             out.append(indent);
                         }
-                        out.append(field.getName()).append(':');
-                        stack.add(field.getName());
-                        if ( field.getName().equals("defaultCode") ) {
-                            System.out.println();
-                        }
-                        format(field.get(o), out, indent, newLine, stack, visited);
+                        out.append(f.getField().getName()).append(':');
+                        stack.add(f.getField().getName());
+                        Type fType = ITestTypeUtils.getTypeProxy(f.getClass(), f.getTypeMap());
+                        format(f.getField().get(o), fType, typeMap, out, indent, newLine, stack, visited);
                         stack.remove(stack.size() - 1);
                     }
                     out.append(newLine);
@@ -147,21 +160,40 @@ public class SimpleJsonFormatter {
         return fields;
     }
 
-    private boolean formatValue(Object object, Appendable out) throws IOException {
+    private boolean formatValue(Object object, Type t, Appendable out) throws IOException {
         boolean res = true;
         if ( null == object ) {
             out.append("null");
-        } else if ( object instanceof Number || object instanceof Boolean ) {
-            out.append(object.toString());
-        } else if ( object instanceof Character || object instanceof String ) {
-            out.append('\'').append(StringEscapeUtils.escapeJava(object.toString())).append('\'');
-        } else if ( object instanceof Date ) {
-            out.append(String.valueOf(((Date) object).getTime()));
-        } else if ( object instanceof Enum ) {
-            out.append(((Enum<?>) object).name());
         } else {
-            res = false;
+            String value = null;
+            if ( object instanceof Number || object instanceof Boolean ) {
+                value = object.toString();
+            } else if ( object instanceof Character || object instanceof String ) {
+                value = '\'' + StringEscapeUtils.escapeJava(object.toString()) + '\'';
+            } else if ( object instanceof Date ) {
+                value = String.valueOf(((Date) object).getTime());
+            } else if ( object instanceof Enum ) {
+                value = ((Enum<?>) object).name();
+            } else {
+                res = false;
+            }
+            if ( res ) {
+                if ( getWrapper(t) != object.getClass() ) {
+                    out.append("{@class:").append(object.getClass().getName()).append(",_:").append(value).append("}");
+                } else {
+                    out.append(value);
+                }
+            }
         }
         return res;
+    }
+
+    private Type getWrapper(Type t) {
+        if ( t instanceof Class ) {
+            if ( ((Class) t).isPrimitive() ) {
+                t = ClassUtils.primitiveToWrapper((Class) t);
+            }
+        }
+        return t;
     }
 }

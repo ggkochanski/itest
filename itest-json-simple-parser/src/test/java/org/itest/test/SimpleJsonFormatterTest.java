@@ -1,30 +1,45 @@
 package org.itest.test;
 
+import org.itest.json.simple.impl.SimpleJsonFormatter;
+import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-
-import org.itest.json.simple.impl.SimpleJsonFormatter;
-import org.junit.Test;
+import java.util.Date;
+import java.util.List;
 
 public class SimpleJsonFormatterTest {
     @Test
     public void test() {
         SimpleJsonFormatter f = new SimpleJsonFormatter();
         StringBuilder sb = new StringBuilder();
-        O o = new O();
-        O oc = new O();
+        H h = new H();
+        O<List<String>> o = new O<List<String>>();
+        h.o = o;
+        O<List<String>> oc = new O<List<String>>();
         o.o = Arrays.asList(oc);
+        o.t = new ArrayList<String>();
+        o.t.add("string1");
         oc.o = Arrays.asList(o);
-        f.format(o, sb);
-        // System.out.println(sb.toString());
+        oc.x = new Date();
+        f.format(h, sb);
+        System.out.println(sb.toString());
     }
 
-    class O {
+    class H {
+        O<List<String>> o;
+    }
+
+    class O<T> {
         String s = "s";
 
         int a = 1, b = 2, c = 3;
 
-        Collection<O> o = new ArrayList<O>();
+        Object x;
+
+        T t;
+
+        Collection<O<T>> o = new ArrayList<O<T>>();
     }
 }
