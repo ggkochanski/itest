@@ -51,7 +51,7 @@ public class ITestSimpleJsonState implements ITestParamState {
                 SimpleJsonState element = simpleJsonState.get(key);
                 if ( key.startsWith("@") ) {
                     addAttribute(key.substring(1), element.getValue());
-                } else if ( "#value".equals(key) ) {
+                } else if ( "_".equals(key) ) {
                     this.value = element.getValue();
                     valueSet=true;
                 } else {

@@ -37,6 +37,7 @@ import org.itest.test.example4.CollectionsExample;
 import org.itest.test.example5.DataProviderExample;
 import org.itest.test.example7.ExternalTestDefinition;
 import org.itest.test.example8.ReferenceExample;
+import org.itest.test.example9.ValueClassExample;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -47,7 +48,7 @@ public class ITestExecutorTest {
         ITestConfigImpl iTestConfigImpl = new ITestConfigImpl();
         iTestConfigImpl.setITestObjectGenerator(new ITestRandomObjectGeneratorImpl(iTestConfigImpl));
         ITestExecutor executor = ITestExecutorUtil.buildExecutor(iTestConfigImpl);
-        perfomTests(executor);
+        performTests(executor);
     }
 
     @Test
@@ -55,7 +56,7 @@ public class ITestExecutorTest {
         ITestConfigImpl iTestConfigImpl = new ITestConfigImpl();
         iTestConfigImpl.setITestObjectGenerator(new ITestRandomObjectGeneratorImpl(iTestConfigImpl));
         ITestExecutor executor = ITestExecutorUtil.buildExecutor(iTestConfigImpl);
-        Assert.assertEquals("", executor.performTestsFor(1, ReferenceExample.class));
+        Assert.assertEquals("", executor.performTestsFor(1, ValueClassExample.class));
     }
 
     @Test
@@ -63,11 +64,11 @@ public class ITestExecutorTest {
         ITestConfigImpl iTestConfigImpl = new ITestConfigImpl();
         iTestConfigImpl.setITestObjectGenerator(new ITestDeclarativeObjectGeneratorImpl(iTestConfigImpl));
         ITestExecutor executor = ITestExecutorUtil.buildExecutor(iTestConfigImpl);
-        perfomTests(executor);
+        performTests(executor);
     }
 
-    void perfomTests(ITestExecutor executor) {
-        Assert.assertEquals("", executor.performTestsFor(28, SimpleExample.class, InterfaceExample.class, ReuseTestDataExample.class, CollectionsExample.class,
-                DataProviderExample.class, ExternalTestDefinition.class, ReferenceExample.class));
+    void performTests(ITestExecutor executor) {
+        Assert.assertEquals("", executor.performTestsFor(29, SimpleExample.class, InterfaceExample.class, ReuseTestDataExample.class, CollectionsExample.class,
+                DataProviderExample.class, ExternalTestDefinition.class, ReferenceExample.class, ValueClassExample.class));
     }
 }
