@@ -53,6 +53,7 @@ public class SimpleJsonFormatterTest {
 
     class A {
         B<C> b;
+        Object object=Arrays.asList("a","b","c");
     }
 
     class B<T> {
@@ -62,6 +63,4 @@ public class SimpleJsonFormatterTest {
     class C {
         String s;
     }
-    @Test
-    public void ss(){}
 }

@@ -9,7 +9,6 @@ import org.itest.util.reflection.ITestTypeUtil;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
 
@@ -27,27 +26,42 @@ public class SimpleJsonFormatter {
             List<String> stack = new ArrayList<String>();
             stack.add("T");
             Map<String, Type> map = ITestTypeUtil.getTypeMap(o.getClass(), new HashMap<String, Type>());
-            format(o, Object.class, map, out, "\t", "\n", stack, new IdentityHashMap<Object, String>());
+            format(o, Object.class, map, out, "\t", "\n", stack, new IdentityHashMap<Object, List<String>>());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     private void format(Object o, Type expectedType, Map<String, Type> typeMap, Appendable out, String indent, String newLine, List<String> stack,
-                        Map<Object, String> visited) throws Exception {
+                        Map<Object, List<String>> visited) throws Exception {
         if (stack.size() > 20) {
             System.out.println(stack);
         }
-        String path;
+        List<String> path;
         if (formatValue(o, expectedType, out)) {
 
         } else if (null != (path = visited.get(o))) {
-            out.append(path);
+            out.append("{@ref=").append(formatPath(stack, path)).append("}");
         } else {
-            visited.put(o, formatPath(stack));
+            visited.put(o, new ArrayList<String>(stack));
             if (o instanceof Collection) {
-                typeMap = ITestTypeUtil.getTypeMap(o.getClass(), typeMap);
                 List<Object> list = (List) o;
+                Type elementType = ITestTypeUtil.getParameterType(expectedType, Collection.class, 0);
+                if (null == elementType) {
+                    elementType = Object.class;
+                }
+                typeMap = ITestTypeUtil.getTypeMap(o.getClass(), typeMap);
+                Type proxyType = ITestTypeUtil.getTypeProxy(elementType, typeMap);
+                Class<?> expectedClass = ITestTypeUtil.getRawClass(expectedType);
+                if (!Collection.class.isAssignableFrom(expectedClass)) {
+                    out.append("{@ref:");
+                    if (o instanceof Set) {
+                        out.append(Set.class.getName());
+                    } else {
+                        out.append(List.class.getName());
+                    }
+                    out.append(",_:");
+                }
                 if (0 == list.size()) {
                     out.append("[]");
                 } else {
@@ -56,17 +70,14 @@ public class SimpleJsonFormatter {
                         if (i > 0) {
                             out.append(',');
                         }
-                        stack.add("[" + i + "]");
-                        //TODO: check if exepcted type is Collection
-                        Type elementType = Object.class;
-                        if (expectedType instanceof ParameterizedType) {
-                            elementType = ((ParameterizedType) expectedType).getActualTypeArguments()[0];
-                        }
-                        Type proxyType = ITestTypeUtil.getTypeProxy(elementType, typeMap);
+                        stack.add(String.valueOf(i));
                         format(list.get(i), proxyType, typeMap, out, indent, newLine, stack, visited);
                         stack.remove(stack.size() - 1);
                     }
                     out.append(']');
+                }
+                if (!Collection.class.isAssignableFrom(expectedClass)) {
+                    out.append("}");
                 }
             } else if (o instanceof Map) {
                 Map<Object, Object> map = (Map<Object, Object>) o;
@@ -79,17 +90,22 @@ public class SimpleJsonFormatter {
                         if (i > 0) {
                             out.append(',');
                         }
-                        stack.add("[" + i + "]");
+                        stack.add(String.valueOf(i));
                         out.append("{key:");
                         stack.add("key");
-
-                        Type keyType = ((ParameterizedType) o.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-                        format(entries.get(i).getKey(), ITestTypeUtil.getRawClass(keyType), typeMap, out, indent, newLine, stack, visited);
+                        Type keyType = ITestTypeUtil.getParameterType(expectedType, Map.class, 0);
+                        if (null == keyType) {
+                            keyType = Object.class;
+                        }
+                        format(entries.get(i).getKey(), keyType, typeMap, out, indent, newLine, stack, visited);
                         stack.remove(stack.size() - 1);
                         out.append(",value:");
                         stack.add("value");
-                        Type valueType = ((ParameterizedType) o.getClass().getGenericSuperclass()).getActualTypeArguments()[1];
-                        format(entries.get(i).getValue(), ITestTypeUtil.getRawClass(valueType), typeMap, out, indent, newLine, stack, visited);
+                        Type valueType = ITestTypeUtil.getParameterType(expectedType, Map.class, 1);
+                        if (null == valueType) {
+                            valueType = Object.class;
+                        }
+                        format(entries.get(i).getValue(), valueType, typeMap, out, indent, newLine, stack, visited);
                         out.append("}");
                         stack.remove(stack.size() - 1);
                         stack.remove(stack.size() - 1);
@@ -138,16 +154,19 @@ public class SimpleJsonFormatter {
         }
     }
 
-    private String formatPath(List<String> stack) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("'=");
-        for (int i = 0; i < stack.size(); i++) {
-            if (i > 0) {
-                sb.append(':');
-            }
-            sb.append(stack.get(i));
+    private String formatPath(List<String> stack, List<String> path) {
+        int start = 0;
+        while (start < path.size() && stack.get(start).equals(path.get(start))) {
+            start++;
         }
-        sb.append("'");
+        StringBuilder sb = new StringBuilder();
+        for (int i = start; i < stack.size(); i++) {
+            sb.append("../");
+        }
+        for (int i = start; i < path.size() - 1; i++) {
+            sb.append(stack.get(i)).append("/");
+        }
+        sb.append(stack.get(stack.size() - 1));
         return sb.toString();
     }
 

@@ -68,6 +68,30 @@ public class ITestTypeUtil {
         return map;
     }
 
+    public static Type getParameterType(Type expectedType, Class<?> searchClass, int paramIndex) {
+        if(null==expectedType){
+            return null;
+        }
+        Class<?> rawClass=getRawClass(expectedType);
+        Type res=null;
+        if(rawClass==searchClass){
+            if(expectedType instanceof ParameterizedType){
+                res=((ParameterizedType)expectedType).getActualTypeArguments()[paramIndex];
+            }
+        }else{
+            res=getParameterType(rawClass.getGenericSuperclass(),searchClass,paramIndex);
+            if(null==res){
+                for(Type type:rawClass.getGenericInterfaces()){
+                    res=getParameterType(type,searchClass,paramIndex);
+                    if(null!=res){
+                        break;
+                    }
+                }
+            }
+        }
+        return res;
+    }
+
     static class GenericArrayTypeImpl implements GenericArrayType {
         private final GenericArrayType orig;
 
