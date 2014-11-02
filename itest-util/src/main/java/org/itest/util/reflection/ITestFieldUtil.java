@@ -28,7 +28,7 @@ public class ITestFieldUtil {
                     res.add(new FieldHolder(f, map));
                 }
             }
-            map = ITestTypeUtils.getTypeMap(clazz, map);
+            map = ITestTypeUtil.getTypeMap(clazz, map);
         } while ((t = t.getSuperclass()) != null);
 
         return res;

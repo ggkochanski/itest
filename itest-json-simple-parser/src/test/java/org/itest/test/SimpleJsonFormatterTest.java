@@ -3,11 +3,7 @@ package org.itest.test;
 import org.itest.json.simple.impl.SimpleJsonFormatter;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class SimpleJsonFormatterTest {
     @Test
@@ -42,4 +38,30 @@ public class SimpleJsonFormatterTest {
 
         Collection<O<T>> o = new ArrayList<O<T>>();
     }
+
+    @Test
+    public void test2() {
+        A a = new A();
+        a.b = new B();
+        a.b.t = new C();
+        a.b.t.s = "abcd";
+        SimpleJsonFormatter f = new SimpleJsonFormatter();
+        StringBuilder sb = new StringBuilder();
+        f.format(a,sb);
+        System.out.println(sb);
+    }
+
+    class A {
+        B<C> b;
+    }
+
+    class B<T> {
+        T t;
+    }
+
+    class C {
+        String s;
+    }
+    @Test
+    public void ss(){}
 }

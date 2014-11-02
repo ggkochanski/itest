@@ -31,39 +31,16 @@ import org.itest.ITestConstants;
 import org.itest.ITestContext;
 import org.itest.annotation.ITestFieldAssignment;
 import org.itest.annotation.ITestFieldClass;
-import org.itest.exception.ITestException;
-import org.itest.exception.ITestIllegalArgumentException;
-import org.itest.exception.ITestInitializationException;
-import org.itest.exception.ITestMethodExecutionException;
-import org.itest.exception.ITestPossibleCycleException;
+import org.itest.exception.*;
 import org.itest.generator.ITestObjectGenerator;
 import org.itest.impl.util.ITestUtils;
 import org.itest.param.ITestParamState;
 import org.itest.util.reflection.ITestFieldUtil;
 import org.itest.util.reflection.ITestFieldUtil.FieldHolder;
-import org.itest.util.reflection.ITestTypeUtils;
+import org.itest.util.reflection.ITestTypeUtil;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Proxy;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.lang.reflect.WildcardType;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.lang.reflect.*;
+import java.util.*;
 
 public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
     private static final int MAX_DEPTH = 20;
@@ -155,7 +132,7 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
         Type[] constructorTypes = c.getGenericParameterTypes();
         Object[] constructorArgs = new Object[constructorTypes.length];
         for (int i = 0; i < constructorTypes.length; i++) {
-            Type pt = ITestTypeUtils.getTypeProxy(constructorTypes[i], map);
+            Type pt = ITestTypeUtil.getTypeProxy(constructorTypes[i], map);
             iTestContext.enter(iTestContext.getCurrentOwner(), "<init[" + i + "]>");
             iTestContext.setEmptyParam();
             constructorArgs[i] = generateRandom(pt, Collections.EMPTY_MAP, iTestContext);
@@ -179,17 +156,17 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
 
     public <T> T generateRandom(Type type, Map<String, Type> itestGenericMap, ITestContext iTestContext) {
         ITestParamState iTestState = iTestContext.getCurrentParam();
-        Class<?> clazz = getClassFromType(type);
+        Class<?> clazz = ITestTypeUtil.getRawClass(type);
         Class<?> requestedClass = getClassFromParam(iTestState);
         Object res;
 
-        if ( null != iTestState && null != iTestState.getAttribute(ITestConstants.REFERENCE_ATTRIBUTE) ) {
+        if (null != iTestState && null != iTestState.getAttribute(ITestConstants.REFERENCE_ATTRIBUTE)) {
             res = iTestContext.findGeneratedObject(iTestState.getAttribute(ITestConstants.REFERENCE_ATTRIBUTE));
-        } else if ( Proxy.class == requestedClass ) {
+        } else if (Proxy.class == requestedClass) {
             res = newDynamicProxy(type, iTestState, itestGenericMap, iTestContext);
-        } else if ( null != requestedClass ) {
+        } else if (null != requestedClass) {
             res = generateRandom(requestedClass, itestGenericMap, iTestContext);
-        } else if ( type instanceof GenericArrayType ) {
+        } else if (type instanceof GenericArrayType) {
             GenericArrayType arrayType = (GenericArrayType) type;
             Class<?> componentClass;
             int size = random.nextInt(RANDOM_MAX - RANDOM_MIN) + RANDOM_MIN;
@@ -209,34 +186,26 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
                 Array.set(array, i, generateRandom(arrayType.getGenericComponentType(), map, iTestContext));
             }
             res = array;
-        } else if ( null != iTestState && null == iTestState.getNames() ) {
+        } else if (null != iTestState && null == iTestState.getNames()) {
             res = iTestConfig.getITestValueConverter().convert(clazz, iTestState.getValue());
-        } else if ( Collection.class.isAssignableFrom(clazz) ) {
+        } else if (Collection.class.isAssignableFrom(clazz)) {
             res = fillCollection(getCurrentObject(iTestContext), type, itestGenericMap, iTestContext);
-        } else if ( Map.class.isAssignableFrom(clazz) ) {
+        } else if (Map.class.isAssignableFrom(clazz)) {
             res = fillMap(getCurrentObject(iTestContext), type, itestGenericMap, iTestContext);
-        } else if ( clazz.isInterface() ) {
+        } else if (clazz.isInterface()) {
             res = newDynamicProxy(type, iTestState, itestGenericMap, iTestContext);
-        } else if ( type instanceof Class ) {
+        } else if (type instanceof Class) {
             res = generateRandom(clazz, itestGenericMap, iTestContext);
-        } else if ( Enum.class == clazz ) {
-            Type enumType = ITestTypeUtils.getTypeProxy(((ParameterizedType) type).getActualTypeArguments()[0], itestGenericMap);
+        } else if (Enum.class == clazz) {
+            Type enumType = ITestTypeUtil.getTypeProxy(((ParameterizedType) type).getActualTypeArguments()[0], itestGenericMap);
             res = generateRandom(enumType, itestGenericMap, iTestContext);
-        } else if ( Class.class == clazz ) {
+        } else if (Class.class == clazz) {
             // probably proxy will be required here
             res = ((ParameterizedType) type).getActualTypeArguments()[0];
         } else {
-            Type[] typeActualArguments = {};
-            if ( !(type instanceof WildcardType) ) {
-                typeActualArguments = ((ParameterizedType) type).getActualTypeArguments();
-            }
-            TypeVariable<?> typeArguments[] = clazz.getTypeParameters();
-            final Map<String, Type> map = new HashMap<String, Type>(itestGenericMap);
-            for (int i = 0; i < typeActualArguments.length; i++) {
-                map.put(typeArguments[i].getName(), typeActualArguments[i]);
-            }
 
-            res = newInstance(clazz, iTestContext, typeActualArguments);
+            Map<String, Type> map = ITestTypeUtil.getTypeMap(type, itestGenericMap);
+            res = newInstance(clazz, iTestContext, ITestTypeUtil.getTypeActualArguments(type));
             fillFields(clazz, res, iTestState, map, iTestContext);
         }
         return (T) res;
@@ -244,13 +213,13 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
 
     private Class<?> getClassFromParam(ITestParamState iTestState) {
         Class<?> clazz = null;
-        if ( null != iTestState ) {
+        if (null != iTestState) {
             String reqClass = iTestState.getAttribute(ITestConstants.ATTRIBUTE_CLASS);
-            if ( null == reqClass && null != iTestState.getElement(ITestConstants.ATTRIBUTE_CLASS) ) {
+            if (null == reqClass && null != iTestState.getElement(ITestConstants.ATTRIBUTE_CLASS)) {
                 reqClass = iTestState.getElement(ITestConstants.ATTRIBUTE_CLASS).getValue();
             }
-            if ( null != reqClass ) {
-                if ( ITestConstants.DYNAMIC.equals(reqClass) ) {
+            if (null != reqClass) {
+                if (ITestConstants.DYNAMIC.equals(reqClass)) {
                     clazz = Proxy.class;
                 } else {
                     clazz = iTestConfig.getITestValueConverter().convert(Class.class, reqClass);
@@ -260,32 +229,6 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
         return clazz;
     }
 
-    protected Class<?> getClassFromType(Type type) {
-        Class<?> clazz;
-        if ( type instanceof Class<?> ) {
-            clazz = (Class<?>) type;
-        } else if ( type instanceof WildcardType ) {
-            clazz = inferClassTypeFromWildcardType(type);
-        } else {
-            clazz = (Class<?>) ((ParameterizedType) type).getRawType();
-        }
-        return clazz;
-    }
-
-    private Class<?> inferClassTypeFromWildcardType(Type type) {
-        Class<?> resultClass = null;
-        if (type instanceof WildcardType) {
-            WildcardType sampleType = (WildcardType) type;
-            Type[] lowerBounds = sampleType.getLowerBounds();
-            Type[] upperBounds = sampleType.getUpperBounds();
-            if (lowerBounds.length != 0) {
-                resultClass = (Class<?>) lowerBounds[0];
-            } else if (upperBounds.length != 0) {
-                resultClass = (Class<?>) upperBounds[0];
-            }
-        }
-        return resultClass;
-    }
 
     private Object getCurrentObject(ITestContext iTestContext) {
         try {
@@ -308,9 +251,8 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
     }
 
     protected Object newDynamicProxy(Type type, final ITestParamState iTestStateNotUsed, final Map<String, Type> itestGenericMap,
-            final ITestContext iTestContext) {
-        final Class<?> clazz = getRawClass(type);
-        Map<String, Type> map = new HashMap<String, Type>();
+                                     final ITestContext iTestContext) {
+        final Class<?> clazz = ITestTypeUtil.getRawClass(type);
         final Map<String, Object> methodResults = new HashMap<String, Object>();
 
         Object res = Proxy.newProxyInstance(clazz.getClassLoader(), new Class<?>[]{clazz}, new InvocationHandler() {
@@ -325,13 +267,8 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             }
         });
 
-        if (type instanceof ParameterizedType) {
-            Type typeActualArguments[] = ((ParameterizedType) type).getActualTypeArguments();
-            TypeVariable<?> typeArguments[] = clazz.getTypeParameters();
-            for (int i = 0; i < typeActualArguments.length; i++) {
-                map.put(typeArguments[i].getName(), typeActualArguments[i]);
-            }
-        }
+
+        Map<String, Type> map = ITestTypeUtil.getTypeMap(type, new HashMap<String, Type>());
 
         Class<?> t = clazz;
         do {
@@ -346,7 +283,7 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
                     fillMethod(m, res, signature, map, iTestContext, methodResults);
                 }
             }
-            map = ITestTypeUtils.getTypeMap(clazz, map);
+            map = ITestTypeUtil.getTypeMap(clazz, map);
         } while ((t = t.getSuperclass()) != null);
 
         return res;
@@ -356,7 +293,7 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
         try {
             iTestContext.enter(res, mSignature);
             ITestParamState mITestState = iTestContext.getCurrentParam();
-            Type rType = ITestTypeUtils.getTypeProxy(m.getGenericReturnType(), map);
+            Type rType = ITestTypeUtil.getTypeProxy(m.getGenericReturnType(), map);
             Object o = generateRandom(rType, map, iTestContext);
             methodResults.put(ITestUtils.getMethodSingnature(m, true), o);
             iTestContext.leave(o);
@@ -383,11 +320,10 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
     }
 
 
-
     protected void fillField(Field f, Object o, ITestParamState fITestStateNotUsed, Map<String, Type> map, ITestContext iTestContext) {
         f.setAccessible(true);
         try {
-            Type fType = ITestTypeUtils.getTypeProxy(f.getGenericType(), map);
+            Type fType = ITestTypeUtil.getTypeProxy(f.getGenericType(), map);
             iTestContext.enter(o, f.getName());
             ITestParamState fITestState = iTestContext.getCurrentParam();
             String fITestValue = fITestState == null ? null : fITestState.getValue();
@@ -395,12 +331,12 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             // if ( fITestState != null && null != fITestState.getAttribute(ITestConstants.REFERENCE_ATTRIBUTE) ) {
             // oRes = iTestContext.findGeneratedObject(fITestState.getAttribute(ITestConstants.REFERENCE_ATTRIBUTE));
             // } else
-            if ( null == fITestState && iTestContext.isStaticAssignmentRegistered(o.getClass(), f.getName()) ) {
+            if (null == fITestState && iTestContext.isStaticAssignmentRegistered(o.getClass(), f.getName())) {
                 iTestContext.registerAssignment(o.getClass(), f.getName());
-                oRes=null;//TODO: implement it
+                oRes = null;//TODO: implement it
             } else if (null == fITestState && f.isAnnotationPresent(ITestFieldAssignment.class)) {
                 iTestContext.registerAssignment(f.getAnnotation(ITestFieldAssignment.class).value());
-                oRes=null;//TODO: implement it
+                oRes = null;//TODO: implement it
             } else if (null == fITestState && f.isAnnotationPresent(ITestFieldClass.class)) {
                 iTestContext.setEmptyParam();
                 oRes = generateRandom((Type) f.getAnnotation(ITestFieldClass.class).value(), map, iTestContext);
@@ -408,7 +344,7 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             } else if (null != fITestValue) {
                 if (fITestValue.startsWith(":")) {
                     // TODO: register assignment
-                    oRes=null;//TODO: implement it
+                    oRes = null;//TODO: implement it
                 } else {
                     oRes = iTestConfig.getITestValueConverter().convert(f.getType(), fITestValue);
                     f.set(o, oRes);
@@ -429,17 +365,6 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
         }
     }
 
-    private Class<?> getRawClass(Type fType) {
-        Class<?> res;
-        if (fType instanceof Class) {
-            res = (Class<?>) fType;
-        } else if (fType instanceof ParameterizedType) {
-            res = getRawClass(((ParameterizedType) fType).getRawType());
-        } else {
-            throw new RuntimeException(fType.getClass() + " not supported");
-        }
-        return res;
-    }
 
     protected Object fillMap(Object o, Type type, Map<String, Type> map, ITestContext iTestContext) {
         ITestParamState iTestState = iTestContext.getCurrentParam();
@@ -455,11 +380,11 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
         }
         for (int i = 0; i < size; i++) {
             iTestContext.enter(m, String.valueOf(i));
-            iTestContext.enter("Map.Entry","key");
+            iTestContext.enter("Map.Entry", "key");
             ITestParamState eITestState = iTestState == null ? null : iTestState.getElement(String.valueOf(i));
             Object key = generateRandom(((ParameterizedType) type).getActualTypeArguments()[0], map, iTestContext);
             iTestContext.leave(key);
-            iTestContext.enter("Map.Entry","value");
+            iTestContext.enter("Map.Entry", "value");
             Object value = generateRandom(((ParameterizedType) type).getActualTypeArguments()[1], map, iTestContext);
             iTestContext.leave(value);
             m.put(key, value);
@@ -534,7 +459,6 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
 
         Object build(Class<?> clazz);
     }
-
 
 
 }

@@ -2,17 +2,14 @@ package org.itest.util.reflection;
 
 import org.itest.exception.ITestException;
 
-import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
+import java.lang.reflect.*;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Created by rumcajs on 10/31/14.
  */
-public class ITestTypeUtils {
+public class ITestTypeUtil {
 
     public static Type getTypeProxy(Type type, Map<String, Type> map) {
         if ( type instanceof ParameterizedType ) {
@@ -48,6 +45,26 @@ public class ITestTypeUtils {
             }
             map = map2;
         }
+        return map;
+    }
+
+    public static Type[] getTypeActualArguments(Type type) {
+        Type[] typeActualArguments = {};
+        if (  (type instanceof  ParameterizedType)) {
+            typeActualArguments = ((ParameterizedType) type).getActualTypeArguments();
+        }
+        return typeActualArguments;
+    }
+
+    public static Map<String, Type> getTypeMap(Type type, Map<String, Type> itestGenericMap) {
+        Class<?> clazz=getRawClass(type);
+        Type[] typeActualArguments=getTypeActualArguments(type);
+        TypeVariable<?> typeArguments[] = clazz.getTypeParameters();
+        final Map<String, Type> map = new HashMap<String, Type>(itestGenericMap);
+        for (int i = 0; i < typeActualArguments.length; i++) {
+            map.put(typeArguments[i].getName(), typeActualArguments[i]);
+        }
+
         return map;
     }
 
@@ -105,6 +122,39 @@ public class ITestTypeUtils {
             return orig.getOwnerType();
         }
 
+    }
+
+    private static Type inferClassTypeFromWildcardType(Type type) {
+        Type resultClass = null;
+        if (type instanceof WildcardType) {
+            WildcardType sampleType = (WildcardType) type;
+            Type[] lowerBounds = sampleType.getLowerBounds();
+            Type[] upperBounds = sampleType.getUpperBounds();
+            if (lowerBounds.length != 0) {
+                resultClass =  lowerBounds[0];
+            } else if (upperBounds.length != 0) {
+                resultClass =  upperBounds[0];
+            }
+        }
+        return resultClass;
+    }
+
+
+
+    public static Class<?> getRawClass(Type fType) {
+        Class<?> res;
+        if (fType instanceof Class) {
+            res = (Class<?>) fType;
+        } else if (fType instanceof ParameterizedType) {
+            res = getRawClass(((ParameterizedType) fType).getRawType());
+//        } else if (fType instanceof TypeVariable){
+//            res= ((TypeVariable)fType).getBounds()
+        } else if ( fType instanceof WildcardType ) {
+            res=getRawClass(inferClassTypeFromWildcardType(fType));
+        } else {
+            throw new RuntimeException(fType.getClass() + " not supported");
+        }
+        return res;
     }
 
 }
