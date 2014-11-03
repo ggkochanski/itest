@@ -50,7 +50,7 @@ public class SimpleJsonFormatter {
         if (formatValue(o, expectedType, out)) {
 
         } else if (null != (path = visited.get(o))) {
-            out.append("{@ref=").append(formatPath(stack, path)).append("}");
+            out.append("{@ref:").append(formatPath(stack, path)).append("}");
         } else {
             visited.put(o, new ArrayList<String>(stack));
             if (o instanceof Collection) {
@@ -67,7 +67,7 @@ public class SimpleJsonFormatter {
                 Type proxyType = ITestTypeUtil.getTypeProxy(elementType, typeMap);
                 Class<?> expectedClass = ITestTypeUtil.getRawClass(expectedType);
                 if (!Collection.class.isAssignableFrom(expectedClass)) {
-                    out.append("{@ref:");
+                    out.append("{@class:");
                     if (o instanceof Set) {
                         out.append(Set.class.getName());
                     } else {
