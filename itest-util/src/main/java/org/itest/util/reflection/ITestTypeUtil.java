@@ -28,10 +28,13 @@ public class ITestTypeUtil {
             if ( res == null ) {
                 // log("typeVariable not found, using Object.class");
                 // res = Serializable.class;
-		res=Object.class;
+        		res=Object.class;
                 //throw new RuntimeException("Type Variable not found in map: " + type);
             }
             return res;
+        }
+        if ( type instanceof WildcardType ){
+            return getTypeProxy(inferClassTypeFromWildcardType(type),map);
         }
         if ( type instanceof Class ) {
             return type;

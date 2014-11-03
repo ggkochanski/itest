@@ -1,8 +1,5 @@
 package org.itest.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.itest.ITestConfig;
 import org.itest.ITestConstants;
 import org.itest.exception.ITestDeclarationNotFoundException;
@@ -10,6 +7,9 @@ import org.itest.exception.ITestException;
 import org.itest.impl.util.IoUtils;
 import org.itest.param.ITestParamLoader;
 import org.itest.param.ITestParamState;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 public class ITestParamLoaderImpl implements ITestParamLoader {
 
@@ -44,7 +44,7 @@ public class ITestParamLoaderImpl implements ITestParamLoader {
         try {
             initParams = iTestConfig.getITestParamParser().parse(init);
         } catch (RuntimeException e) {
-            throw new ITestException("Error parsing " + resourceName);
+            throw new ITestException("Error parsing " + resourceName,e);
         }
         if ( !namedFileFound ) {
             initParams = initParams.getElement(use);

@@ -59,11 +59,7 @@ public class SimpleJsonFormatter {
                 if (null == elementType) {
                     elementType = Object.class;
                 }
-                try {
-                    typeMap = ITestTypeUtil.getTypeMap(elementType, typeMap);
-                } catch (RuntimeException e) {
-                    System.out.println();
-                }
+                typeMap = ITestTypeUtil.getTypeMap(elementType, typeMap);
                 Type proxyType = ITestTypeUtil.getTypeProxy(elementType, typeMap);
                 Class<?> expectedClass = ITestTypeUtil.getRawClass(expectedType);
                 if (!Collection.class.isAssignableFrom(expectedClass)) {
@@ -182,9 +178,9 @@ public class SimpleJsonFormatter {
             sb.append("../");
         }
         for (int i = start; i < path.size() - 1; i++) {
-            sb.append(stack.get(i)).append("/");
+            sb.append(path.get(i)).append("/");
         }
-        sb.append(stack.get(stack.size() - 1));
+        sb.append(path.get(path.size() - 1));
         return sb.toString();
     }
 

@@ -416,10 +416,11 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             size = iTestState.getSizeParam();
         }
 
+        Type elementType=ITestTypeUtil.getTypeProxy(ITestTypeUtil.getParameterType(type,Collection.class,0,map),map);
         for (int i = 0; i < size; i++) {
             iTestContext.enter(col, String.valueOf(i));
-            ITestParamState elementITestState = iTestState == null ? null : iTestState.getElement(String.valueOf(i));
-            Object value = generateRandom(((ParameterizedType) type).getActualTypeArguments()[0], map, iTestContext);
+            Object value;
+            value = generateRandom(elementType, map, iTestContext);
             col.add(value);
             iTestContext.leave(value);
         }

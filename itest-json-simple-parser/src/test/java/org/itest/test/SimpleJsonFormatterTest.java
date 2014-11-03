@@ -63,4 +63,19 @@ public class SimpleJsonFormatterTest {
     class C {
         String s;
     }
+    @Test
+    public void test3(){
+        Array a = new Array();
+        a.f=new double[]{1.1,2.2,3.3};
+        a.array =new Array();
+        a.array.f=a.f;
+        SimpleJsonFormatter f = new SimpleJsonFormatter();
+        StringBuilder sb = new StringBuilder();
+        f.format(a,sb);
+        System.out.println(sb);
+    }
+    class Array{
+        double[] f;
+        Array array;
+    }
 }
