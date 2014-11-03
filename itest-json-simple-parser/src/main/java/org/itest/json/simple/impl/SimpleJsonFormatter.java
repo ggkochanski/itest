@@ -10,7 +10,16 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class SimpleJsonFormatter {
     public static final Comparator<Field> FIELD_NAME_COMPARATOR = new Comparator<Field>() {
@@ -25,7 +34,7 @@ public class SimpleJsonFormatter {
         try {
             List<String> stack = new ArrayList<String>();
             stack.add("T");
-            Map<String, Type> map = ITestTypeUtil.getTypeMap(o.getClass(), new HashMap<String, Type>());
+            Map<String, Type> map = ITestTypeUtil.getTypeMap((Type) o.getClass(), new HashMap<String, Type>());
             format(o, Object.class, map, out, "\t", "\n", stack, new IdentityHashMap<Object, List<String>>());
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -45,12 +54,16 @@ public class SimpleJsonFormatter {
         } else {
             visited.put(o, new ArrayList<String>(stack));
             if (o instanceof Collection) {
-                List<Object> list = (List) o;
-                Type elementType = ITestTypeUtil.getParameterType(expectedType, Collection.class, 0);
+                Collection<Object> list = (Collection) o;
+                Type elementType = ITestTypeUtil.getParameterType(expectedType, Collection.class, 0, typeMap);
                 if (null == elementType) {
                     elementType = Object.class;
                 }
-                typeMap = ITestTypeUtil.getTypeMap(o.getClass(), typeMap);
+                try {
+                    typeMap = ITestTypeUtil.getTypeMap(elementType, typeMap);
+                } catch (RuntimeException e) {
+                    System.out.println();
+                }
                 Type proxyType = ITestTypeUtil.getTypeProxy(elementType, typeMap);
                 Class<?> expectedClass = ITestTypeUtil.getRawClass(expectedType);
                 if (!Collection.class.isAssignableFrom(expectedClass)) {
@@ -66,12 +79,13 @@ public class SimpleJsonFormatter {
                     out.append("[]");
                 } else {
                     out.append('[');
-                    for (int i = 0; i < list.size(); i++) {
+                    int i = 0;
+                    for (Object element : list) {
                         if (i > 0) {
                             out.append(',');
                         }
-                        stack.add(String.valueOf(i));
-                        format(list.get(i), proxyType, typeMap, out, indent, newLine, stack, visited);
+                        stack.add(String.valueOf(i++));
+                        format(element, proxyType, typeMap, out, indent, newLine, stack, visited);
                         stack.remove(stack.size() - 1);
                     }
                     out.append(']');
@@ -93,7 +107,7 @@ public class SimpleJsonFormatter {
                         stack.add(String.valueOf(i));
                         out.append("{key:");
                         stack.add("key");
-                        Type keyType = ITestTypeUtil.getParameterType(expectedType, Map.class, 0);
+                        Type keyType = ITestTypeUtil.getParameterType(expectedType, Map.class, 0, typeMap);
                         if (null == keyType) {
                             keyType = Object.class;
                         }
@@ -101,7 +115,7 @@ public class SimpleJsonFormatter {
                         stack.remove(stack.size() - 1);
                         out.append(",value:");
                         stack.add("value");
-                        Type valueType = ITestTypeUtil.getParameterType(expectedType, Map.class, 1);
+                        Type valueType = ITestTypeUtil.getParameterType(expectedType, Map.class, 1, typeMap);
                         if (null == valueType) {
                             valueType = Object.class;
                         }
@@ -114,7 +128,11 @@ public class SimpleJsonFormatter {
                     out.append(']');
                 }
             } else {
-                typeMap = ITestTypeUtil.getTypeMap(expectedType, typeMap);
+                try {
+                    typeMap = ITestTypeUtil.getTypeMap(expectedType, typeMap);
+                } catch (RuntimeException e) {
+                    throw e;
+                }
                 Collection<FieldHolder> fields = ITestFieldUtil.collectFields(o.getClass(), typeMap);
                 if (0 == fields.size() && o.getClass() == expectedType) {
                     out.append("{}");

@@ -2,7 +2,11 @@ package org.itest.util.reflection;
 
 import org.itest.exception.ITestException;
 
-import java.lang.reflect.*;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +28,8 @@ public class ITestTypeUtil {
             if ( res == null ) {
                 // log("typeVariable not found, using Object.class");
                 // res = Serializable.class;
-                throw new RuntimeException("Type Variable not found in map: " + type);
+		res=Object.class;
+                //throw new RuntimeException("Type Variable not found in map: " + type);
             }
             return res;
         }
@@ -63,12 +68,15 @@ public class ITestTypeUtil {
         final Map<String, Type> map = new HashMap<String, Type>(itestGenericMap);
         for (int i = 0; i < typeActualArguments.length; i++) {
             map.put(typeArguments[i].getName(), typeActualArguments[i]);
+            if(typeArguments[i].equals("E") && "E".equals(typeActualArguments[i].toString())){
+                System.out.println();
+            }
         }
 
         return map;
     }
 
-    public static Type getParameterType(Type expectedType, Class<?> searchClass, int paramIndex) {
+    public static Type getParameterType(Type expectedType, Class<?> searchClass, int paramIndex, Map<String, Type> map) {
         if(null==expectedType){
             return null;
         }
@@ -76,19 +84,21 @@ public class ITestTypeUtil {
         Type res=null;
         if(rawClass==searchClass){
             if(expectedType instanceof ParameterizedType){
-                res=((ParameterizedType)expectedType).getActualTypeArguments()[paramIndex];
+                res = ((ParameterizedType) getTypeProxy(expectedType, map)).getActualTypeArguments()[paramIndex];
             }
         }else{
-            res=getParameterType(rawClass.getGenericSuperclass(),searchClass,paramIndex);
+            map = getTypeMap(expectedType, map);
+            res = getParameterType(rawClass.getGenericSuperclass(), searchClass, paramIndex, map);
             if(null==res){
                 for(Type type:rawClass.getGenericInterfaces()){
-                    res=getParameterType(type,searchClass,paramIndex);
+                    res = getParameterType(type, searchClass, paramIndex, map);
                     if(null!=res){
                         break;
                     }
                 }
             }
         }
+
         return res;
     }
 
