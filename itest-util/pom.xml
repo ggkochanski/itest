@@ -4,11 +4,11 @@
     <parent>
         <artifactId>itest</artifactId>
         <groupId>org.itest</groupId>
-        <version>1.2.1</version>
+        <version>1.2.2-SNAPSHOT</version>
     </parent>
     <groupId>org.itest</groupId>
     <artifactId>itest-util</artifactId>
-    <version>1.2.1</version>
+    <version>1.2.2-SNAPSHOT</version>
     <name>itest-util</name>
     <url>https://github.com/ggkochanski/itest/</url>
     <properties>
@@ -18,7 +18,7 @@
         <dependency>
             <groupId>org.itest</groupId>
             <artifactId>itest-iface</artifactId>
-            <version>1.2.1</version>
+            <version>1.2.2-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>
