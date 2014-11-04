@@ -25,11 +25,11 @@
  */
 package org.itest.impl;
 
-import java.util.Date;
-
 import org.apache.commons.lang.StringEscapeUtils;
 import org.itest.exception.ITestInitializationException;
 import org.itest.param.ITestValueConverter;
+
+import java.util.Date;
 
 public class ITestValueConverterImpl implements ITestValueConverter {
 
@@ -46,6 +46,8 @@ public class ITestValueConverterImpl implements ITestValueConverter {
             res = Long.valueOf(value);
         } else if ( Double.class == clazz || double.class == clazz ) {
             res = Double.valueOf(value);
+        } else if (Float.class == clazz || float.class == clazz ) {
+            res = Float.valueOf(value);
         } else if ( Boolean.class == clazz || boolean.class == clazz ) {
             res = Boolean.valueOf(value);
         } else if ( Character.class == clazz || char.class == clazz ) {

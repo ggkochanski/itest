@@ -7,9 +7,7 @@ import org.itest.util.reflection.ITestFieldUtil.FieldHolder;
 import org.itest.util.reflection.ITestTypeUtil;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -53,14 +51,31 @@ public class SimpleJsonFormatter {
             out.append("{@ref:").append(formatPath(stack, path)).append("}");
         } else {
             visited.put(o, new ArrayList<String>(stack));
-            if (o instanceof Collection) {
-                Collection<Object> list = (Collection) o;
-                Type elementType = ITestTypeUtil.getParameterType(expectedType, Collection.class, 0, typeMap);
-                if (null == elementType) {
-                    elementType = Object.class;
+            if(o.getClass().isArray()) {
+                Type elementType;
+                if(expectedType instanceof GenericArrayType){
+                    elementType=ITestTypeUtil.getTypeProxy(((GenericArrayType)expectedType).getGenericComponentType(),typeMap);
+                }else{
+                    elementType=ITestTypeUtil.getRawClass(expectedType).getComponentType();
                 }
-                typeMap = ITestTypeUtil.getTypeMap(elementType, typeMap);
-                Type proxyType = ITestTypeUtil.getTypeProxy(elementType, typeMap);
+                int length= Array.getLength(o);
+                if(0==length){
+                    out.append("[]");
+                }else{
+                    out.append("[");
+                    for(int i=0;i<length;i++){
+                        if(i>0){
+                            out.append(',');
+                        }
+                        stack.add(String.valueOf(i));
+                        format(Array.get(o,i),elementType,typeMap,out,indent,newLine,stack,visited);
+                        stack.remove(stack.size()-1);
+                    }
+                    out.append("]");
+                }
+            }else if (o instanceof Collection) {
+                Collection<Object> list = (Collection) o;
+                Type elementType = ITestTypeUtil.getTypeProxy(ITestTypeUtil.getParameterType(expectedType, Collection.class, 0, typeMap),typeMap);
                 Class<?> expectedClass = ITestTypeUtil.getRawClass(expectedType);
                 if (!Collection.class.isAssignableFrom(expectedClass)) {
                     out.append("{@class:");
@@ -81,7 +96,7 @@ public class SimpleJsonFormatter {
                             out.append(',');
                         }
                         stack.add(String.valueOf(i++));
-                        format(element, proxyType, typeMap, out, indent, newLine, stack, visited);
+                        format(element, elementType, typeMap, out, indent, newLine, stack, visited);
                         stack.remove(stack.size() - 1);
                     }
                     out.append(']');
@@ -90,6 +105,10 @@ public class SimpleJsonFormatter {
                     out.append("}");
                 }
             } else if (o instanceof Map) {
+                Type mapType=ITestTypeUtil.getRawClass(ITestTypeUtil.getTypeProxy(expectedType,typeMap));
+                if(mapType!=o.getClass()){
+                    out.append("{@class:").append(o.getClass().getName()).append(",_:");
+                }
                 Map<Object, Object> map = (Map<Object, Object>) o;
                 if (0 == map.size()) {
                     out.append("[]");
@@ -122,6 +141,9 @@ public class SimpleJsonFormatter {
 
                     }
                     out.append(']');
+                }
+                if(mapType!=o.getClass()){
+                    out.append("}");
                 }
             } else {
                 try {

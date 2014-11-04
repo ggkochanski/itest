@@ -369,6 +369,14 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
     protected Object fillMap(Object o, Type type, Map<String, Type> map, ITestContext iTestContext) {
         ITestParamState iTestState = iTestContext.getCurrentParam();
         Map<Object, Object> m = (Map<Object, Object>) o;
+        if(null!=iTestContext.getCurrentParam() && null!=iTestContext.getCurrentParam().getAttribute(ITestConstants.ATTRIBUTE_CLASS)){
+            Class<?> mapClass=iTestConfig.getITestValueConverter().convert(Class.class,iTestContext.getCurrentParam().getAttribute(ITestConstants
+                    .ATTRIBUTE_CLASS));
+            iTestContext.enter(o,"<init>");
+            iTestContext.setEmptyParam();
+            m=(Map<Object,Object>)newInstance(mapClass,iTestContext);
+            iTestContext.leave(m);
+        }
         if (null == m) {
             m = new HashMap<Object, Object>();
         } else {
