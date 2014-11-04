@@ -83,16 +83,11 @@ public class SimpleJsonFormatter {
                 elementType = defaultIfNull(ITestTypeUtil.getParameterType(expectedType, Collection.class, 0, typeMap), Object.class);
                 elementType = ITestTypeUtil.getTypeProxy(elementType, typeMap);
 
-                Class<?> expectedClass = ITestTypeUtil.getRawClass(expectedType);
-                if (!Collection.class.isAssignableFrom(expectedClass)) {
-                    out.append("{@class:");
-                    if (o instanceof Set) {
-                        out.append(Set.class.getName());
-                    } else {
-                        out.append(List.class.getName());
-                    }
-                    out.append(",_:");
+                Type mapType = ITestTypeUtil.getRawClass(ITestTypeUtil.getTypeProxy(expectedType, typeMap));
+                if ( mapType != o.getClass() ) {
+                    out.append("{@class:").append(o.getClass().getName()).append(",_:");
                 }
+
                 if (0 == list.size()) {
                     out.append("[]");
                 } else {
@@ -108,19 +103,21 @@ public class SimpleJsonFormatter {
                     }
                     out.append(']');
                 }
-                if (!Collection.class.isAssignableFrom(expectedClass)) {
+                if ( mapType != o.getClass() ) {
                     out.append("}");
                 }
             } else if (o instanceof Map) {
-                // Type mapType=ITestTypeUtil.getRawClass(ITestTypeUtil.getTypeProxy(expectedType,typeMap));
-                // if(mapType!=o.getClass()){
-                // out.append("{@class:").append(o.getClass().getName()).append(",_:");
-                // }
+                Type mapType = ITestTypeUtil.getRawClass(ITestTypeUtil.getTypeProxy(expectedType, typeMap));
+                if ( mapType != o.getClass() ) {
+                    out.append("{@class:").append(o.getClass().getName()).append(",_:");
+                }
                 Map<Object, Object> map = (Map<Object, Object>) o;
                 if (0 == map.size()) {
                     out.append("[]");
                 } else {
                     out.append('[');
+                    Type keyType = defaultIfNull(ITestTypeUtil.getParameterType(expectedType, Map.class, 0, typeMap), Object.class);
+                    Type valueType = defaultIfNull(ITestTypeUtil.getParameterType(expectedType, Map.class, 1, typeMap), Object.class);
                     List<Map.Entry<Object, Object>> entries = new ArrayList<Map.Entry<Object, Object>>(map.entrySet());
                     for (int i = 0; i < map.size(); i++) {
                         if (i > 0) {
@@ -129,18 +126,10 @@ public class SimpleJsonFormatter {
                         stack.add(String.valueOf(i));
                         out.append("{key:");
                         stack.add("key");
-                        Type keyType = ITestTypeUtil.getParameterType(expectedType, Map.class, 0, typeMap);
-                        if (null == keyType) {
-                            keyType = Object.class;
-                        }
                         format(entries.get(i).getKey(), keyType, typeMap, out, indent, newLine, stack, visited);
                         stack.remove(stack.size() - 1);
                         out.append(",value:");
                         stack.add("value");
-                        Type valueType = ITestTypeUtil.getParameterType(expectedType, Map.class, 1, typeMap);
-                        if (null == valueType) {
-                            valueType = Object.class;
-                        }
                         format(entries.get(i).getValue(), valueType, typeMap, out, indent, newLine, stack, visited);
                         out.append("}");
                         stack.remove(stack.size() - 1);
@@ -149,9 +138,9 @@ public class SimpleJsonFormatter {
                     }
                     out.append(']');
                 }
-                // if(mapType!=o.getClass()){
-                // out.append("}");
-                // }
+                if ( mapType != o.getClass() ) {
+                    out.append("}");
+                }
             } else {
                 try {
                     typeMap = ITestTypeUtil.getTypeMap(expectedType, typeMap);

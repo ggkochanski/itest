@@ -31,7 +31,11 @@ import org.itest.ITestConstants;
 import org.itest.ITestContext;
 import org.itest.annotation.ITestFieldAssignment;
 import org.itest.annotation.ITestFieldClass;
-import org.itest.exception.*;
+import org.itest.exception.ITestException;
+import org.itest.exception.ITestIllegalArgumentException;
+import org.itest.exception.ITestInitializationException;
+import org.itest.exception.ITestMethodExecutionException;
+import org.itest.exception.ITestPossibleCycleException;
 import org.itest.generator.ITestObjectGenerator;
 import org.itest.impl.util.ITestUtils;
 import org.itest.param.ITestParamState;
@@ -39,8 +43,26 @@ import org.itest.util.reflection.ITestFieldUtil;
 import org.itest.util.reflection.ITestFieldUtil.FieldHolder;
 import org.itest.util.reflection.ITestTypeUtil;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 
 public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
     private static final int MAX_DEPTH = 20;
@@ -159,11 +181,16 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
         Class<?> clazz = ITestTypeUtil.getRawClass(type);
         Class<?> requestedClass = getClassFromParam(iTestState);
         Object res;
-
-        if (null != iTestState && null != iTestState.getAttribute(ITestConstants.REFERENCE_ATTRIBUTE)) {
+        if ( null != iTestState && null == iTestState.getSizeParam() && null == iTestState.getValue() ) {
+            res = null;
+        } else if ( null != iTestState && null != iTestState.getAttribute(ITestConstants.REFERENCE_ATTRIBUTE) ) {
             res = iTestContext.findGeneratedObject(iTestState.getAttribute(ITestConstants.REFERENCE_ATTRIBUTE));
         } else if (Proxy.class == requestedClass) {
-            res = newDynamicProxy(type, iTestState, itestGenericMap, iTestContext);
+            res = newDynamicProxy(type, itestGenericMap, iTestContext);
+        } else if ( Collection.class.isAssignableFrom(clazz) ) {
+            res = fillCollection(getCurrentObject(iTestContext), type, itestGenericMap, iTestContext);
+        } else if ( Map.class.isAssignableFrom(clazz) ) {
+            res = fillMap(getCurrentObject(iTestContext), type, itestGenericMap, iTestContext);
         } else if (null != requestedClass) {
             res = generateRandom(requestedClass, itestGenericMap, iTestContext);
         } else if (type instanceof GenericArrayType) {
@@ -188,12 +215,8 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             res = array;
         } else if (null != iTestState && null == iTestState.getNames()) {
             res = iTestConfig.getITestValueConverter().convert(clazz, iTestState.getValue());
-        } else if (Collection.class.isAssignableFrom(clazz)) {
-            res = fillCollection(getCurrentObject(iTestContext), type, itestGenericMap, iTestContext);
-        } else if (Map.class.isAssignableFrom(clazz)) {
-            res = fillMap(getCurrentObject(iTestContext), type, itestGenericMap, iTestContext);
         } else if (clazz.isInterface()) {
-            res = newDynamicProxy(type, iTestState, itestGenericMap, iTestContext);
+            res = newDynamicProxy(type, itestGenericMap, iTestContext);
         } else if (type instanceof Class) {
             res = generateRandom(clazz, itestGenericMap, iTestContext);
         } else if (Enum.class == clazz) {
@@ -250,8 +273,7 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
         }
     }
 
-    protected Object newDynamicProxy(Type type, final ITestParamState iTestStateNotUsed, final Map<String, Type> itestGenericMap,
-                                     final ITestContext iTestContext) {
+    protected Object newDynamicProxy(Type type, final Map<String, Type> itestGenericMap, final ITestContext iTestContext) {
         final Class<?> clazz = ITestTypeUtil.getRawClass(type);
         final Map<String, Object> methodResults = new HashMap<String, Object>();
 
@@ -370,12 +392,9 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
         ITestParamState iTestState = iTestContext.getCurrentParam();
         Map<Object, Object> m = (Map<Object, Object>) o;
         if(null!=iTestContext.getCurrentParam() && null!=iTestContext.getCurrentParam().getAttribute(ITestConstants.ATTRIBUTE_CLASS)){
-            Class<?> mapClass=iTestConfig.getITestValueConverter().convert(Class.class,iTestContext.getCurrentParam().getAttribute(ITestConstants
-                    .ATTRIBUTE_CLASS));
-            iTestContext.enter(o,"<init>");
-            iTestContext.setEmptyParam();
-            m=(Map<Object,Object>)newInstance(mapClass,iTestContext);
-            iTestContext.leave(m);
+            Class<?> mapClass = iTestConfig.getITestValueConverter().convert(Class.class,
+                    iTestContext.getCurrentParam().getAttribute(ITestConstants.ATTRIBUTE_CLASS));
+            m = (Map<Object, Object>) newInstance(mapClass, iTestContext);
         }
         if (null == m) {
             m = new HashMap<Object, Object>();
@@ -404,6 +423,12 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
     protected Object fillCollection(Object o, Type type, Map<String, Type> map, ITestContext iTestContext) {
         ITestParamState iTestState = iTestContext.getCurrentParam();
         Collection<Object> col = (Collection<Object>) o;
+        if ( null != iTestContext.getCurrentParam() && null != iTestContext.getCurrentParam().getAttribute(ITestConstants.ATTRIBUTE_CLASS) ) {
+            Class<?> mapClass = iTestConfig.getITestValueConverter().convert(Class.class,
+                    iTestContext.getCurrentParam().getAttribute(ITestConstants.ATTRIBUTE_CLASS));
+            col = (Collection<Object>) newInstance(mapClass, iTestContext);
+        }
+
         if (null == col) {
             Class<?> collectionClass;
             if (type instanceof Class<?>) {

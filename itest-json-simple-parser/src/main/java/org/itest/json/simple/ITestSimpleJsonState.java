@@ -52,8 +52,18 @@ public class ITestSimpleJsonState implements ITestParamState {
                 if ( key.startsWith("@") ) {
                     addAttribute(key.substring(1), element.getValue());
                 } else if ( "_".equals(key) ) {
-                    this.value = element.getValue();
-                    valueSet=true;
+                    Iterable<String> names = element.names();
+                    if ( null == names ) {
+                        this.value = element.getValue();
+                        valueSet = true;
+                    } else {
+                        if ( null == elements ) {
+                            elements = new LinkedHashMap<String, ITestSimpleJsonState>();
+                        }
+                        for (String name : names) {
+                            elements.put(name, new ITestSimpleJsonState(element.get(name)));
+                        }
+                    }
                 } else {
                     ITestSimpleJsonState state = null;
                     if ( null != element ) {
