@@ -188,9 +188,9 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
         } else if (Proxy.class == requestedClass) {
             res = newDynamicProxy(type, itestGenericMap, iTestContext);
         } else if ( Collection.class.isAssignableFrom(clazz) ) {
-            res = fillCollection(getCurrentObject(iTestContext), type, itestGenericMap, iTestContext);
+            res = fillCollection(null, type, itestGenericMap, iTestContext);
         } else if ( Map.class.isAssignableFrom(clazz) ) {
-            res = fillMap(getCurrentObject(iTestContext), type, itestGenericMap, iTestContext);
+            res = fillMap(null, type, itestGenericMap, iTestContext);
         } else if (null != requestedClass) {
             res = generateRandom(requestedClass, itestGenericMap, iTestContext);
         } else if (type instanceof GenericArrayType) {
@@ -252,26 +252,6 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
         return clazz;
     }
 
-
-    private Object getCurrentObject(ITestContext iTestContext) {
-        try {
-            Object owner = iTestContext.getCurrentOwner();
-            String fName = iTestContext.getCurrentField();
-            Class<?> clazz = owner.getClass();
-            Object res = null;
-            do {
-                try {
-                    Field f = clazz.getDeclaredField(fName);
-                    f.setAccessible(true);
-                    res = f.get(owner);
-                } catch (NoSuchFieldException e) {
-                }
-            } while (null != (clazz = clazz.getSuperclass()));
-            return res;
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     protected Object newDynamicProxy(Type type, final Map<String, Type> itestGenericMap, final ITestContext iTestContext) {
         final Class<?> clazz = ITestTypeUtil.getRawClass(type);
@@ -423,24 +403,23 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
     protected Object fillCollection(Object o, Type type, Map<String, Type> map, ITestContext iTestContext) {
         ITestParamState iTestState = iTestContext.getCurrentParam();
         Collection<Object> col = (Collection<Object>) o;
+        Class collectionClass;
         if ( null != iTestContext.getCurrentParam() && null != iTestContext.getCurrentParam().getAttribute(ITestConstants.ATTRIBUTE_CLASS) ) {
-            Class<?> mapClass = iTestConfig.getITestValueConverter().convert(Class.class,
+            collectionClass = iTestConfig.getITestValueConverter().convert(Class.class,
                     iTestContext.getCurrentParam().getAttribute(ITestConstants.ATTRIBUTE_CLASS));
-            col = (Collection<Object>) newInstance(mapClass, iTestContext);
+        } else {
+            collectionClass = ITestTypeUtil.getRawClass(type);
         }
-
-        if (null == col) {
-            Class<?> collectionClass;
-            if (type instanceof Class<?>) {
-                collectionClass = (Class<?>) type;
-            } else {
-                collectionClass = (Class<?>) ((ParameterizedType) type).getRawType();
-            }
-            if (Set.class.isAssignableFrom(collectionClass)) {
+        if ( !collectionClass.isInterface() ) {
+            col = (Collection<Object>) newInstance(collectionClass, iTestContext);
+        } else {
+            if ( Set.class.isAssignableFrom(collectionClass) ) {
                 col = new HashSet<Object>();
             } else {
                 col = new ArrayList<Object>();
             }
+        }
+        if ( null == col ) {
         } else {
             col.clear();
         }

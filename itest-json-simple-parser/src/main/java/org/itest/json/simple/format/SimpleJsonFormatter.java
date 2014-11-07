@@ -1,4 +1,4 @@
-package org.itest.json.simple.impl;
+package org.itest.json.simple.format;
 
 import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -32,6 +32,16 @@ public class SimpleJsonFormatter {
         }
     };
 
+    private final SimpleJsonFormatterConfig simpleFormatterConfig;
+
+    public SimpleJsonFormatter() {
+        this(new SimpleJsonFormatterConfig());
+    }
+
+    public SimpleJsonFormatter(SimpleJsonFormatterConfig simpleJsonFormatterConfig) {
+        this.simpleFormatterConfig = simpleJsonFormatterConfig;
+    }
+
     public void format(Object o, Appendable out) {
         try {
             List<String> stack = new ArrayList<String>();
@@ -55,6 +65,7 @@ public class SimpleJsonFormatter {
             out.append("{@ref:").append(formatPath(stack, path)).append("}");
         } else {
             visited.put(o, new ArrayList<String>(stack));
+            Class<?> targetClass = simpleFormatterConfig.translateClass(o.getClass());
             if(o.getClass().isArray()) {
                 Type elementType;
                 if(expectedType instanceof GenericArrayType){
@@ -84,8 +95,8 @@ public class SimpleJsonFormatter {
                 elementType = ITestTypeUtil.getTypeProxy(elementType, typeMap);
 
                 Type mapType = ITestTypeUtil.getRawClass(ITestTypeUtil.getTypeProxy(expectedType, typeMap));
-                if ( mapType != o.getClass() ) {
-                    out.append("{@class:").append(o.getClass().getName()).append(",_:");
+                if ( mapType != targetClass ) {
+                    out.append("{@class:").append(targetClass.getName()).append(",_:");
                 }
 
                 if (0 == list.size()) {
@@ -103,13 +114,13 @@ public class SimpleJsonFormatter {
                     }
                     out.append(']');
                 }
-                if ( mapType != o.getClass() ) {
+                if ( mapType != targetClass ) {
                     out.append("}");
                 }
             } else if (o instanceof Map) {
                 Type mapType = ITestTypeUtil.getRawClass(ITestTypeUtil.getTypeProxy(expectedType, typeMap));
-                if ( mapType != o.getClass() ) {
-                    out.append("{@class:").append(o.getClass().getName()).append(",_:");
+                if ( mapType != targetClass ) {
+                    out.append("{@class:").append(targetClass.getName()).append(",_:");
                 }
                 Map<Object, Object> map = (Map<Object, Object>) o;
                 if (0 == map.size()) {
@@ -138,7 +149,7 @@ public class SimpleJsonFormatter {
                     }
                     out.append(']');
                 }
-                if ( mapType != o.getClass() ) {
+                if ( mapType != targetClass ) {
                     out.append("}");
                 }
             } else {
@@ -153,11 +164,11 @@ public class SimpleJsonFormatter {
                 } else {
                     out.append('{').append(newLine);
                     boolean separator = false;
-                    if (o.getClass() != ITestTypeUtil.getRawClass(expectedType)) {
+                    if ( ITestTypeUtil.getRawClass(expectedType) != targetClass ) {
                         for (int i = 0; i < stack.size(); i++) {
                             out.append(indent);
                         }
-                        out.append("@class:").append(o.getClass().getName());
+                        out.append("@class:").append(targetClass.getName());
                         separator = true;
                     }
                     for (FieldHolder f : fields) {
@@ -199,10 +210,12 @@ public class SimpleJsonFormatter {
         for (int i = start; i < stack.size(); i++) {
             sb.append("../");
         }
-        for (int i = start; i < path.size() - 1; i++) {
+        for (int i = start; i < path.size(); i++) {
             sb.append(path.get(i)).append("/");
         }
-        sb.append(path.get(path.size() - 1));
+        if ( '/' == sb.charAt(sb.length() - 1) ) {
+            sb.deleteCharAt(sb.length() - 1);
+        }
         return sb.toString();
     }
 

@@ -163,6 +163,9 @@ public class ITestContextImpl implements ITestContext {
                 res = res.getElement(token);
             }
         }
+        if ( null == res ) {
+            throw new ITestException("@ref:" + targetPath + " not found");
+        }
         return res.getValue();
     }
 

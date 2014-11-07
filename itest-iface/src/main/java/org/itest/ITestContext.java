@@ -25,10 +25,10 @@
  */
 package org.itest;
 
-import org.itest.param.ITestParamState;
-
 import java.util.List;
 import java.util.Map;
+
+import org.itest.param.ITestParamState;
 
 public interface ITestContext {
 

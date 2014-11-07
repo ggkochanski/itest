@@ -26,7 +26,7 @@ public class ITestParamLoaderImpl implements ITestParamLoader {
         boolean namedFileFound = true;
         InputStream is = iTestClass.getClassLoader().getResourceAsStream(resourceName);
         if ( null == is ) {
-            resourceName = new StringBuilder(128).append(iTestClass.getName().replace('.', '/')).append(".itest").toString();
+            resourceName = new StringBuilder(128).append(iTestClass.getName().replace('.', '/')).append(".itest.json").toString();
             is = iTestClass.getClassLoader().getResourceAsStream(resourceName);
             if ( null == is ) {
                 throw new ITestDeclarationNotFoundException("File (" + resourceName + ") not found.");
@@ -58,7 +58,7 @@ public class ITestParamLoaderImpl implements ITestParamLoader {
     }
 
     public static String resourceName(Class<?> iTestClass, String name) {
-        return new StringBuilder(128).append(iTestClass.getName().replace('.', '/')).append('.').append(name).append(".itest").toString();
+        return new StringBuilder(128).append(iTestClass.getName().replace('.', '/')).append('.').append(name).append(".itest.json").toString();
 
     }
 }

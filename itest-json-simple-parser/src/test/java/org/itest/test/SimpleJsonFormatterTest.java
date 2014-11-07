@@ -1,6 +1,6 @@
 package org.itest.test;
 
-import org.itest.json.simple.impl.SimpleJsonFormatter;
+import org.itest.json.simple.format.SimpleJsonFormatter;
 import org.junit.Test;
 
 import java.util.*;
