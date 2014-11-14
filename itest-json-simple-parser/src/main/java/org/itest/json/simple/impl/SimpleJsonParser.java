@@ -26,6 +26,7 @@
 package org.itest.json.simple.impl;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class SimpleJsonParser {
@@ -89,7 +90,7 @@ public class SimpleJsonParser {
     }
 
     private SimpleJsonState readJsonObject(SimpleJsonTokenizer x) {
-        Map<String, SimpleJsonState> elements = new HashMap<String, SimpleJsonState>();
+        Map<String, SimpleJsonState> elements = new LinkedHashMap<String, SimpleJsonState>();
         SimpleJsonState res = new SimpleJsonState(elements);
 
         char c;

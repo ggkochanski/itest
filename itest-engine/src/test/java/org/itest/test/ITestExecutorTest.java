@@ -31,6 +31,8 @@ import org.itest.executor.ITestExecutorUtil;
 import org.itest.impl.ITestDeclarativeObjectGeneratorImpl;
 import org.itest.impl.ITestRandomObjectGeneratorImpl;
 import org.itest.test.example1.SimpleExample;
+import org.itest.test.example10.LazyLoadedDefinitionExample;
+import org.itest.test.example11.ITestSuperObjectExample;
 import org.itest.test.example2.InterfaceExample;
 import org.itest.test.example3.ReuseTestDataExample;
 import org.itest.test.example4.CollectionsExample;
@@ -68,7 +70,8 @@ public class ITestExecutorTest {
     }
 
     void performTests(ITestExecutor executor) {
-        Assert.assertEquals("", executor.performTestsFor(27, SimpleExample.class, InterfaceExample.class, ReuseTestDataExample.class, CollectionsExample.class,
-                DataProviderExample.class, ExternalTestDefinition.class, ReferenceExample.class, ValueClassExample.class));
+        Assert.assertEquals("", executor.performTestsFor(35, SimpleExample.class, InterfaceExample.class, ReuseTestDataExample.class, CollectionsExample.class,
+                DataProviderExample.class, ExternalTestDefinition.class, ReferenceExample.class, ValueClassExample.class, LazyLoadedDefinitionExample.class,
+                ITestSuperObjectExample.class));
     }
 }

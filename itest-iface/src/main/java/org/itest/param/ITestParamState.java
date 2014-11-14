@@ -25,11 +25,13 @@
  */
 package org.itest.param;
 
+import java.util.Collection;
+
 public interface ITestParamState {
 
     Integer getSizeParam();
 
-    Iterable<String> getNames();
+    Collection<String> getNames();
 
     ITestParamState getElement(String name);
 

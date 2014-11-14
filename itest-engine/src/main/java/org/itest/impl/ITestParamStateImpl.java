@@ -2,10 +2,7 @@ package org.itest.impl;
 
 import org.itest.param.ITestParamState;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ITestParamStateImpl implements ITestParamState {
     protected Map<String, ITestParamState> elements;
@@ -45,13 +42,13 @@ public class ITestParamStateImpl implements ITestParamState {
 
     public void addElement(String token, ITestParamState iTestParamsImpl) {
         if (null == elements) {
-            elements = new LinkedHashMap<String, ITestParamState>();
+            elements = createElements();
         }
         elements.put(token, iTestParamsImpl);
     }
 
     @Override
-    public Iterable<String> getNames() {
+    public Collection<String> getNames() {
         return elements == null ? null : elements.keySet();
     }
 
@@ -87,5 +84,8 @@ public class ITestParamStateImpl implements ITestParamState {
             sb.append(elements);
         }
         return sb.toString();
+    }
+    private static Map<String,ITestParamState> createElements(){
+        return new LinkedHashMap<String, ITestParamState>();
     }
 }

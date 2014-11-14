@@ -47,4 +47,5 @@ public interface ITestConstants {
     String REFERENCE_ATTRIBUTE = "ref";
 
     String ATTRIBUTE_CLASS = "class";
+    String ATTRIBUTE_DEFINITION = "def";
 }

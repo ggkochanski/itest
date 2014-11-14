@@ -25,10 +25,10 @@
  */
 package org.itest;
 
+import org.itest.param.ITestParamState;
+
 import java.util.List;
 import java.util.Map;
-
-import org.itest.param.ITestParamState;
 
 public interface ITestContext {
 
@@ -55,4 +55,6 @@ public interface ITestContext {
     void setEmptyParam();
 
     Object findGeneratedObject(String path);
+
+    void replaceCurrentState(ITestParamState iTestState);
 }

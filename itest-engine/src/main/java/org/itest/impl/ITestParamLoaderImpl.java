@@ -29,7 +29,7 @@ public class ITestParamLoaderImpl implements ITestParamLoader {
             resourceName = new StringBuilder(128).append(iTestClass.getName().replace('.', '/')).append(".itest.json").toString();
             is = iTestClass.getClassLoader().getResourceAsStream(resourceName);
             if ( null == is ) {
-                throw new ITestDeclarationNotFoundException("File (" + resourceName + ") not found.");
+                throw new ITestDeclarationNotFoundException("File (" + resourceName + ") for use (" + use + ") not found.");
             }
             namedFileFound = false;
         }

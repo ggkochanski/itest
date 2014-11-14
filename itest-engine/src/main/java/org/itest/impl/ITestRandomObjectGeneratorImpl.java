@@ -29,6 +29,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.itest.ITestConfig;
 import org.itest.ITestConstants;
 import org.itest.ITestContext;
+import org.itest.ITestSuperObject;
 import org.itest.annotation.ITestFieldAssignment;
 import org.itest.annotation.ITestFieldClass;
 import org.itest.exception.ITestException;
@@ -66,6 +67,8 @@ import java.util.Set;
 
 public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
     private static final int MAX_DEPTH = 20;
+
+    private static final Class<?> PROXY_CLASS = Proxy.class;
 
     public static final ITestParamState EMPTY_STATE = new ITestParamStateImpl() {
         {
@@ -179,13 +182,21 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
     public <T> T generateRandom(Type type, Map<String, Type> itestGenericMap, ITestContext iTestContext) {
         ITestParamState iTestState = iTestContext.getCurrentParam();
         Class<?> clazz = ITestTypeUtil.getRawClass(type);
+
         Class<?> requestedClass = getClassFromParam(iTestState);
+        if ( null != iTestState && null != iTestState.getAttribute(ITestConstants.ATTRIBUTE_DEFINITION) ) {
+            iTestState = iTestConfig.getITestParamLoader()
+                    .loadITestParam(null == requestedClass ? clazz : requestedClass, iTestState.getAttribute(ITestConstants.ATTRIBUTE_DEFINITION))
+                    .getElement(ITestConstants.THIS);
+            iTestContext.replaceCurrentState(iTestState);
+        }
+
         Object res;
         if ( null != iTestState && null == iTestState.getSizeParam() && null == iTestState.getValue() ) {
             res = null;
         } else if ( null != iTestState && null != iTestState.getAttribute(ITestConstants.REFERENCE_ATTRIBUTE) ) {
             res = iTestContext.findGeneratedObject(iTestState.getAttribute(ITestConstants.REFERENCE_ATTRIBUTE));
-        } else if (Proxy.class == requestedClass) {
+        } else if ( PROXY_CLASS == requestedClass ) {
             res = newDynamicProxy(type, itestGenericMap, iTestContext);
         } else if ( Collection.class.isAssignableFrom(clazz) ) {
             res = fillCollection(null, type, itestGenericMap, iTestContext);
@@ -243,7 +254,7 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             }
             if (null != reqClass) {
                 if (ITestConstants.DYNAMIC.equals(reqClass)) {
-                    clazz = Proxy.class;
+                    clazz = PROXY_CLASS;
                 } else {
                     clazz = iTestConfig.getITestValueConverter().convert(Class.class, reqClass);
                 }
@@ -314,15 +325,28 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
         if (iTestContext.depth() > MAX_DEPTH) {
             throw new ITestPossibleCycleException("Possible cycle detected.");
         }
-        Collection<FieldHolder> fieldHolders = ITestFieldUtil.collectFields(clazz, map);
         ITestParamState itestState = iTestContext.getCurrentParam();
-        for (FieldHolder f : fieldHolders) {
-            fillField(f.getField(), o, itestState == null ? null : itestState.getElement(f.getField().getName()), f.getTypeMap(), iTestContext);
+        if ( null != itestState && null != itestState.getNames() && o instanceof ITestSuperObject ) {
+            ITestSuperObject iTestSuperObject = (ITestSuperObject) o;
+            for (String name : itestState.getNames()) {
+                iTestContext.enter(o, name);
+                Object value = generate((Type) Object.class, null, map, iTestContext);
+                iTestSuperObject.setField(name, value);
+                iTestContext.leave(value);
+            }
+        } else {
+            Collection<FieldHolder> fieldHolders = collectFields(clazz, map, iTestContext);
+            for (FieldHolder f : fieldHolders) {
+                fillField(f.getField(), o, f.getTypeMap(), iTestContext);
+            }
         }
     }
 
+    protected Collection<FieldHolder> collectFields(Class<?> clazz, Map<String, Type> map, ITestContext iTestContext) {
+        return ITestFieldUtil.collectFields(clazz, map);
+    }
 
-    protected void fillField(Field f, Object o, ITestParamState fITestStateNotUsed, Map<String, Type> map, ITestContext iTestContext) {
+    protected void fillField(Field f, Object o, Map<String, Type> map, ITestContext iTestContext) {
         f.setAccessible(true);
         try {
             Type fType = ITestTypeUtil.getTypeProxy(f.getGenericType(), map);

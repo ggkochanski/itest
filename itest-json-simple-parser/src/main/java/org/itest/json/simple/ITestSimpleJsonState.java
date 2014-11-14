@@ -28,9 +28,7 @@ package org.itest.json.simple;
 import org.itest.json.simple.impl.SimpleJsonState;
 import org.itest.param.ITestParamState;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ITestSimpleJsonState implements ITestParamState {
 
@@ -57,7 +55,7 @@ public class ITestSimpleJsonState implements ITestParamState {
                         valueSet = true;
                     } else {
                         if ( null == elements ) {
-                            elements = new HashMap<String, ITestSimpleJsonState>();
+                            elements = createElements();
                         }
                         for (String name : names) {
                             elements.put(name, new ITestSimpleJsonState(element.get(name)));
@@ -69,13 +67,13 @@ public class ITestSimpleJsonState implements ITestParamState {
                         state = new ITestSimpleJsonState(element);
                     }
                     if ( null == elements ) {
-                        elements = new HashMap<String, ITestSimpleJsonState>();
+                        elements = createElements();
                     }
                     elements.put(key, state);
                 }
             }
             if(!valueSet&&null==elements){
-                elements = new HashMap<String, ITestSimpleJsonState>();
+                elements = createElements();
             }
         }
     }
@@ -93,7 +91,7 @@ public class ITestSimpleJsonState implements ITestParamState {
     }
 
     @Override
-    public Iterable<String> getNames() {
+    public Collection<String> getNames() {
         return null == elements ? null : elements.keySet();
     }
 
@@ -119,5 +117,7 @@ public class ITestSimpleJsonState implements ITestParamState {
     private static Map<String, String> emptyMap() {
         return Collections.emptyMap();
     }
-
+    private static Map<String, ITestSimpleJsonState> createElements(){
+        return new LinkedHashMap<String,ITestSimpleJsonState>();
+    }
 }

@@ -3,10 +3,7 @@ package org.itest.util.reflection;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Created by rumcajs on 10/31/14.
@@ -28,12 +25,11 @@ public class ITestFieldUtil {
                     res.add(new FieldHolder(f, map));
                 }
             }
-            map = ITestTypeUtil.getTypeMap(clazz, map);
+            map = ITestTypeUtil.getTypeMap(t, map);
         } while ((t = t.getSuperclass()) != null);
 
         return res;
     }
-
     protected Comparator<? super FieldHolder> getFieldComparator() {
         return fieldComparator;
     }
