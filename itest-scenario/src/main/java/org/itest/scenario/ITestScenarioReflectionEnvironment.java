@@ -10,11 +10,11 @@ import java.util.Map;
 /**
  * Created by rumi on 2014-11-13.
  */
-public class ITestReflectionEnvironment extends ITestEnvironment implements ITestSuperObject {
+public class ITestScenarioReflectionEnvironment extends ITestScenarioEnvironment implements ITestSuperObject {
     private Map<String, Object> fields = new HashMap<String, Object>();
 
     @Override
-    public Object execute(ITestAction action, Object[] args) {
+    public Object execute(ITestScenarioAction action, Object[] args) {
         try {
             Object target = fields.get(action.getName());
             Method m = target.getClass().getMethod(action.getMethodName(), action.getParamTypes());

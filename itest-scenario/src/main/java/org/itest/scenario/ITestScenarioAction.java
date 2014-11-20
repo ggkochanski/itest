@@ -5,7 +5,7 @@ import java.util.Arrays;
 /**
  * Created by rumcajs on 11/13/14.
  */
-public class ITestAction {
+public class ITestScenarioAction {
     String name;
 
     String methodName;

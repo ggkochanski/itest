@@ -24,6 +24,7 @@ public class ITestParamLoaderImpl implements ITestParamLoader {
 
         String resourceName = resourceName(iTestClass, use);
         boolean namedFileFound = true;
+
         InputStream is = iTestClass.getClassLoader().getResourceAsStream(resourceName);
         if ( null == is ) {
             resourceName = new StringBuilder(128).append(iTestClass.getName().replace('.', '/')).append(".itest.json").toString();

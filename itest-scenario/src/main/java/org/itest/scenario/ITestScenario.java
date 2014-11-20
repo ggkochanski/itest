@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Created by rumcajs on 11/13/14.
  */
-public class ITestScenario<A extends ITestAction> {
+public class ITestScenario<A extends ITestScenarioAction> {
 
     private List<Action> actions;
 
