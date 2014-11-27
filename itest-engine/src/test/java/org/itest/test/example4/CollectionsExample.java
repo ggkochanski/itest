@@ -40,7 +40,7 @@ public class CollectionsExample {
     private Map<String, String> map;
 
     @ITests({ @ITest(name = "arrayInit", init = "T:{array:[1,2,3]}"),
-            @ITest(name = "verify1stElement", initRef = @ITestRef(use = "arrayInit"), verify = "T:{array:[1]}"),
+            @ITest(name = "verify1stElement", initRef = @ITestRef(use = "arrayInit"), verify = "T:{array:{@size:3,_:[1]}}"),
             @ITest(name = "verify2ndElement", initRef = @ITestRef(use = "arrayInit"), verify = "T:{array:[{},2]}") })
     public int getArrayLength() {
         return array.length;
@@ -48,14 +48,14 @@ public class CollectionsExample {
 
     @ITests({
             @ITest(name = "listInit", init = "T:{list:[1,15.27,.7e-2]}"), //
-            @ITest(name = "verifyElementValueV1", initRef = @ITestRef(use = "listInit"), verify = "T:{list:{2:7e-3}}"),
+            @ITest(name = "verifyElementValueV1", initRef = @ITestRef(use = "listInit"), verify = "T:{list:{@size:3,2:7e-3}}"),
             @ITest(name = "verifyElementValueV2", initRef = @ITestRef(use = "listInit"), verify = "T:{list:[{},{},7e-3]}") })
     public int getListSize() {
         return list.size();
     }
 
     @ITests({ @ITest(name = "mapInit", init = "T:{map:[{key:key1,value:value1},{key:key2}]}"),
-            @ITest(name = "checkValueExists", initRef = @ITestRef(use = "mapInit"), verify = "T:{map:[{key:key1,value:value1},{key:xxx,value:null}]}"),
+            @ITest(name = "checkValueExists", initRef = @ITestRef(use = "mapInit"), verify = "T:{map:{@size:2,_:[{key:key1,value:value1},{key:xxx,value:null}]}}"),
             @ITest(name = "checkKeyExists", initRef = @ITestRef(use = "mapInit"), verify = "T:{map:[{key:key1},{key:key2}]}") })
     public String getFromMap(String key) {
         return map.get(key);

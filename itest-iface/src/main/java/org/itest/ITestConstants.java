@@ -48,4 +48,5 @@ public interface ITestConstants {
 
     String ATTRIBUTE_CLASS = "class";
     String ATTRIBUTE_DEFINITION = "def";
+    String ATTRIBUTE_SIZE = "size";
 }

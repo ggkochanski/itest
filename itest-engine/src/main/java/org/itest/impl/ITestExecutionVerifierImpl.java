@@ -25,18 +25,19 @@
  */
 package org.itest.impl;
 
+import org.itest.ITestConfig;
+import org.itest.ITestConstants;
+import org.itest.exception.ITestMethodExecutionException;
+import org.itest.param.ITestParamState;
+import org.itest.verify.ITestExecutionVerifier;
+import org.itest.verify.ITestFieldVerificationResult;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
-import org.itest.ITestConfig;
-import org.itest.exception.ITestMethodExecutionException;
-import org.itest.param.ITestParamState;
-import org.itest.verify.ITestExecutionVerifier;
-import org.itest.verify.ITestFieldVerificationResult;
 
 public class ITestExecutionVerifierImpl implements ITestExecutionVerifier {
 
@@ -71,6 +72,10 @@ public class ITestExecutionVerifierImpl implements ITestExecutionVerifier {
                 }
             } else if ( resultObject instanceof Collection ) {
                 List<Object> list = new ArrayList<Object>((Collection<Object>) resultObject);
+                String size = stateParam.getAttribute(ITestConstants.ATTRIBUTE_SIZE);
+                if (null != size) {
+                    res.add(new ITestFieldVerificationResultImpl(name + "@" + ITestConstants.ATTRIBUTE_SIZE, Integer.valueOf(size), list.size(), Integer.parseInt(size) == list.size(), null));
+                }
                 for (String fName : stateParam.getNames()) {
                     int index = Integer.parseInt(fName);
                     if ( index >= list.size() ) {
@@ -81,6 +86,10 @@ public class ITestExecutionVerifierImpl implements ITestExecutionVerifier {
                 }
             } else if ( resultObject instanceof Map ) {
                 Map<Object, Object> map = (Map<Object, Object>) resultObject;
+                String size = stateParam.getAttribute(ITestConstants.ATTRIBUTE_SIZE);
+                if (null != size) {
+                    res.add(new ITestFieldVerificationResultImpl(name + "@" + ITestConstants.ATTRIBUTE_SIZE, Integer.valueOf(size), map.size(), Integer.parseInt(size) == map.size(), null));
+                }
                 for (String fName : stateParam.getNames()) {
                     ITestParamState mState = stateParam.getElement(fName);
                     if ( null == mState || null == mState.getNames() ) {
@@ -113,6 +122,10 @@ public class ITestExecutionVerifierImpl implements ITestExecutionVerifier {
                 }
             } else if ( resultObject.getClass().isArray() ) {
                 int aSize = Array.getLength(resultObject);
+                String size = stateParam.getAttribute(ITestConstants.ATTRIBUTE_SIZE);
+                if (null != size) {
+                    res.add(new ITestFieldVerificationResultImpl(name + "@" + ITestConstants.ATTRIBUTE_SIZE, Integer.valueOf(size), aSize, Integer.parseInt(size) == aSize, null));
+                }
                 for (String fName : stateParam.getNames()) {
                     int index = Integer.parseInt(fName);
                     if ( index >= aSize ) {
