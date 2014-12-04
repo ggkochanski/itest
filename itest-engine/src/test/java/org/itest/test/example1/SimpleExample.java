@@ -71,4 +71,15 @@ public class SimpleExample {
         }
     }
 
+    enum SomeEnum{
+        A,B,C;
+    }
+    static class SomeClass<T>{
+        T value;
+    }
+    @ITests(@ITest(init = "A:[{value:B}]",verify = "R:B"))
+    public SomeEnum getEnum(SomeClass<SomeEnum> e){
+        return e.value;
+    }
+
 }

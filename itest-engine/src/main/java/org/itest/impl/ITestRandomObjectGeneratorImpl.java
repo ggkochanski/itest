@@ -367,14 +367,14 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
                 iTestContext.setEmptyParam();
                 oRes = generateRandom((Type) f.getAnnotation(ITestFieldClass.class).value(), map, iTestContext);
                 f.set(o, oRes);
-            } else if (null != fITestValue) {
-                if (fITestValue.startsWith(":")) {
-                    // TODO: register assignment
-                    oRes = null;//TODO: implement it
-                } else {
-                    oRes = iTestConfig.getITestValueConverter().convert(f.getType(), fITestValue);
-                    f.set(o, oRes);
-                }
+//            } else if (null != fITestValue) {
+//                if (fITestValue.startsWith(":")) {
+//                    // TODO: register assignment
+//                    oRes = null;//TODO: implement it
+//                } else {
+//                    oRes = iTestConfig.getITestValueConverter().convert(f.getType(), fITestValue);
+//                    f.set(o, oRes);
+//                }
             } else {
                 oRes = generateRandom(fType, map, iTestContext);
                 f.set(o, oRes);
