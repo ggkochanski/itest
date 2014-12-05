@@ -28,7 +28,11 @@ package org.itest.test.example1;
 import org.itest.annotation.ITest;
 import org.itest.annotation.ITestRef;
 import org.itest.annotation.ITests;
+import org.junit.Assert;
 
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.List;
 
 public class SimpleExample {
@@ -82,4 +86,12 @@ public class SimpleExample {
         return e.value;
     }
 
+    @ITests(@ITest(init = "A:[1,2,3,4,{@class:java.sql.Time,_:5}]", verify = "A:[{},{@class:java.sql.Time}],R:15"))
+    public long setDate(Timestamp timestamp, Time time, Date sqlDate, java.util.Date utilDate, java.util.Date anyDate) {
+        Assert.assertEquals(Timestamp.class,timestamp.getClass());
+        Assert.assertEquals(Time.class, time.getClass());
+        Assert.assertEquals(Date.class, sqlDate.getClass());
+        Assert.assertEquals(java.util.Date.class, utilDate.getClass());
+        return timestamp.getTime() + time.getTime() + sqlDate.getTime() + utilDate.getTime()+anyDate.getTime();
+    }
 }

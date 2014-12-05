@@ -26,9 +26,12 @@
 package org.itest.impl;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.itest.exception.ITestException;
 import org.itest.exception.ITestInitializationException;
 import org.itest.param.ITestValueConverter;
 
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Date;
 
 public class ITestValueConverterImpl implements ITestValueConverter {
@@ -56,8 +59,13 @@ public class ITestValueConverterImpl implements ITestValueConverter {
                 throw new ITestInitializationException("Character expected, found (" + value + ") " + value.length() + " characters.", null);
             }
             res = value.charAt(0);
-        } else if ( Date.class == clazz ) {
-            res = new Date(Long.valueOf(value));
+        } else if (Date.class == clazz || Time.class == clazz || Timestamp.class == clazz || java.sql.Date.class == clazz) {
+            Long milis = Long.valueOf(value);
+            try {
+                res = clazz.getConstructor(long.class).newInstance(milis);
+            } catch (Exception e) {
+                throw new ITestException("", e);
+            }
         } else if ( clazz.isEnum() ) {
             res = Enum.valueOf((Class<Enum>) clazz, value);
         } else if ( Class.class == clazz ) {
