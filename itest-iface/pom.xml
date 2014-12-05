@@ -4,11 +4,11 @@
 	<parent>
 		<artifactId>itest</artifactId>
 		<groupId>org.itest</groupId>
-		<version>1.3.3-SNAPSHOT</version>
+		<version>1.3.3</version>
 	</parent>
 	<groupId>org.itest</groupId>
 	<artifactId>itest-iface</artifactId>
-	<version>1.3.3-SNAPSHOT</version>
+	<version>1.3.3</version>
 	<name>itest-iface</name>
 	<url>https://github.com/ggkochanski/itest/</url>
 	<properties>
