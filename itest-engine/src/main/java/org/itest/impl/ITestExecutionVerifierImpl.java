@@ -59,6 +59,8 @@ public class ITestExecutionVerifierImpl implements ITestExecutionVerifier {
     private void verify(Collection<ITestFieldVerificationResult> res, String name, Object resultObject, ITestParamState stateParam) {
         boolean testResult = false;
         try {
+            verifyClass(name,stateParam.getAttribute(ITestConstants.ATTRIBUTE_CLASS),resultObject,res);
+
             if ( null == stateParam.getNames() ) {
                 if ( null == stateParam.getValue() ) {
                     testResult = (null == resultObject);
@@ -149,6 +151,13 @@ public class ITestExecutionVerifierImpl implements ITestExecutionVerifier {
             }
         } catch (ClassCastException e) {
             res.add(new ITestFieldVerificationResultImpl(name, stateParam.getValue(), resultObject, false, e.getMessage()));
+        }
+    }
+
+    private void verifyClass(String name,String classAttribute, Object resultObject, Collection<ITestFieldVerificationResult> res) {
+        if (null != classAttribute) {
+            String objectClass = null == resultObject ? null : resultObject.getClass().getName();
+            res.add(new ITestFieldVerificationResultImpl(name + ".class", classAttribute, objectClass, classAttribute.equals(objectClass), null));
         }
     }
 
