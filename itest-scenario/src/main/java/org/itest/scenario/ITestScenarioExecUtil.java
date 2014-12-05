@@ -33,7 +33,6 @@ public class ITestScenarioExecUtil {
             if (null != action.getResult()) {
                 experiment.getParams().setField(action.getResult(), result);
             }
-
         }
     }
 

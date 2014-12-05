@@ -185,9 +185,10 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
 
         Class<?> requestedClass = getClassFromParam(iTestState);
         if ( null != iTestState && null != iTestState.getAttribute(ITestConstants.ATTRIBUTE_DEFINITION) ) {
-            iTestState = iTestConfig.getITestParamLoader()
+            ITestParamState iTestStateLoaded = iTestConfig.getITestParamLoader()
                     .loadITestParam(null == requestedClass ? clazz : requestedClass, iTestState.getAttribute(ITestConstants.ATTRIBUTE_DEFINITION))
                     .getElement(ITestConstants.THIS);
+            iTestState = iTestConfig.getITestParamsMerger().merge(new ITestParamAssignmentImpl("", iTestStateLoaded), new ITestParamAssignmentImpl("", iTestState));
             iTestContext.replaceCurrentState(iTestState);
         }
 

@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
 
 public class ITestParamMergerImpl implements ITestParamMerger {
 
@@ -50,15 +51,8 @@ public class ITestParamMergerImpl implements ITestParamMerger {
         for (ITestParamAssignment iTestParamAssignment : iTestParamAssignments) {
             ITestParamState itestParam = iTestParamAssignment.getITestParamState();
             for (String transformation : iTestParamAssignment.getTransformation()) {
-                ITestParamStateImpl state = new ITestParamStateImpl();
-                ITestParamState thisState = getState(ITestConstants.THIS, transformation, itestParam);
-                ITestParamState argState = getState(ITestConstants.ARG, transformation, itestParam);
-                if ( null != thisState ) {
-                    state.addElement(ITestConstants.THIS, thisState);
-                }
-                if ( null != argState ) {
-                    state.addElement(ITestConstants.ARG, argState);
-                }
+                //ITestParamStateImpl state = new ITestParamStateImpl();
+                ITestParamState state = getState(transformation, itestParam);
                 unifiedStates.add(state);
             }
         }
@@ -69,9 +63,14 @@ public class ITestParamMergerImpl implements ITestParamMerger {
         if ( 1 == unifiedStates.size() ) {
             return unifiedStates.iterator().next();
         }
+        Collection<String> collectedElements = new TreeSet<String>();
+        for (ITestParamState unifiedState : unifiedStates) {
+            collectedElements.addAll(unifiedState.getNames());
+        }
         ITestParamStateImpl mergedState = new ITestParamStateImpl();
-        merge(ITestConstants.THIS, mergedState, unifiedStates);
-        merge(ITestConstants.ARG, mergedState, unifiedStates);
+        for (String element : collectedElements) {
+            merge(element, mergedState, unifiedStates);
+        }
         return mergedState;
     }
 
@@ -96,8 +95,10 @@ public class ITestParamMergerImpl implements ITestParamMerger {
                     if ( null == currentState ) {
                         currentState = new ITestParamStateImpl();
                         parentState.addElement(name, currentState);
+                        copyAttributes(currentState, unifiedElements);
                     }
                     currentState.value = itestState.getValue();
+
                 }
             }
         }
@@ -135,35 +136,30 @@ public class ITestParamMergerImpl implements ITestParamMerger {
         return res;
     }
 
-    private ITestParamState getState(String element, String transformation, ITestParamState itestParam) {
+    private ITestParamState getState(String transformation, ITestParamState itestParam) {
         if ( 0 == transformation.length() ) {
-            return itestParam.getElement(element);
+            return itestParam;
         }
         String s = transformation.replaceAll(ITestConstants.ASSIGN, ITestConstants.ASSIGN_SEPARATOR + ITestConstants.ASSIGN + ITestConstants.ASSIGN_SEPARATOR);
         StringTokenizer t = new StringTokenizer(s, ITestConstants.ASSIGN_SEPARATOR);
-        String token = t.nextToken();
-        if ( element.equals(token) ) {
-            ITestParamStateImpl prevState = new ITestParamStateImpl();
-            ITestParamState res = prevState;
-            String prevToken = null;
-            while ( !ITestConstants.ASSIGN.equals(token = t.nextToken())) {
-                if ( null != prevToken ) {
-                    ITestParamStateImpl p = new ITestParamStateImpl();
-                    prevState.addElement(prevToken, p);
-                    prevState = p;
-                }
-                prevToken = token;
-            }
-            while (t.hasMoreElements()) {
-                itestParam = itestParam.getElement(t.nextToken());
-            }
-            if ( null == prevToken ) {
-                res = itestParam;
+        ITestParamStateImpl res = new ITestParamStateImpl();
+        ITestParamStateImpl prevState = null;
+        String token;
+        String prevToken = null;
+        while (!ITestConstants.ASSIGN.equals(token = t.nextToken())) {
+            ITestParamStateImpl p = new ITestParamStateImpl();
+            if (prevState != null) {
+                prevState.addElement(prevToken, p);
             } else {
-                prevState.addElement(prevToken, itestParam);
+                p = res;
             }
-            return res;
+            prevState = p;
+            prevToken = token;
         }
-        return null;
+        while (t.hasMoreElements()) {
+            itestParam = itestParam.getElement(t.nextToken());
+        }
+        prevState.addElement(prevToken, itestParam);
+        return res;
     }
 }

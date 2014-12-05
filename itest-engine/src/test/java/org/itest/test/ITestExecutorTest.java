@@ -58,7 +58,7 @@ public class ITestExecutorTest {
         ITestConfigImpl iTestConfigImpl = new ITestConfigImpl();
         iTestConfigImpl.setITestObjectGenerator(new ITestRandomObjectGeneratorImpl(iTestConfigImpl));
         ITestExecutor executor = ITestExecutorUtil.buildExecutor(iTestConfigImpl);
-        Assert.assertEquals("", executor.performTestsFor(3, ValueClassExample.class));
+        Assert.assertEquals("", executor.performTestsFor(16, LazyLoadedDefinitionExample.class));
     }
 
     @Test
@@ -70,7 +70,7 @@ public class ITestExecutorTest {
     }
 
     void performTests(ITestExecutor executor) {
-        Assert.assertEquals("", executor.performTestsFor(43, SimpleExample.class, InterfaceExample.class, ReuseTestDataExample.class, CollectionsExample.class,
+        Assert.assertEquals("", executor.performTestsFor(58, SimpleExample.class, InterfaceExample.class, ReuseTestDataExample.class, CollectionsExample.class,
                 DataProviderExample.class, ExternalTestDefinition.class, ReferenceExample.class, ValueClassExample.class, LazyLoadedDefinitionExample.class,
                 ITestSuperObjectExample.class));
     }

@@ -1,4 +1,4 @@
 {
-    e1:{value:100},
-    def:{@def:e1}
+    e1:{value:100,value2:2,o:{@class:java.util.Date,_:7},o2:{@class:java.lang.Integer,_:2},e:{value:1,value2:2,e:null}},
+    def:{@def:e1,value2:3,o:{@class:java.lang.Long,_:6},e:{value2:3}}
 }
