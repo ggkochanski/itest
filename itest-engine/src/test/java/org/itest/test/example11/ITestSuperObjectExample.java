@@ -4,7 +4,9 @@ import org.itest.ITestSuperObject;
 import org.itest.annotation.ITest;
 import org.itest.annotation.ITests;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -22,12 +24,26 @@ public class ITestSuperObjectExample {
         return superObject.map.keySet();
     }
 
+
     static class SuperObject implements ITestSuperObject {
         private Map<String, Object> map = new LinkedHashMap<String, Object>();
 
         @Override
         public void setField(String name, Object value) {
             map.put(name, value);
+        }
+    }
+
+    @ITests(@ITest(init = "A:[{v1:1,v2:{@class:java.lang.Integer,_:2}}]",verify = "A:[{values:[{@class:java.util.Date},{@class:java.lang.Integer}]}]"))
+    public void declareSuperObjectValueType(DateSuperObject dateSuperObject){
+
+    }
+
+    static class DateSuperObject implements ITestSuperObject<Date>{
+        Collection<Object> values=new ArrayList<Object>();
+        @Override
+        public void setField(String name, Object value) {
+            values.add(value);
         }
     }
 }

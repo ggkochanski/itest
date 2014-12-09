@@ -329,9 +329,13 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
         ITestParamState itestState = iTestContext.getCurrentParam();
         if ( null != itestState && null != itestState.getNames() && o instanceof ITestSuperObject ) {
             ITestSuperObject iTestSuperObject = (ITestSuperObject) o;
+            Type contentType=ITestTypeUtil.getParameterType(o.getClass(),ITestSuperObject.class,0,map);
+            if(null==contentType){
+                contentType= Object.class;
+            }
             for (String name : itestState.getNames()) {
                 iTestContext.enter(o, name);
-                Object value = generate((Type) Object.class, null, map, iTestContext);
+                Object value = generate(contentType, null, map, iTestContext);
                 iTestSuperObject.setField(name, value);
                 iTestContext.leave(value);
             }
