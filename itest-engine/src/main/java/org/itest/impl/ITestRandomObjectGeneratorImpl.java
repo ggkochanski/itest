@@ -193,7 +193,9 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
         }
 
         Object res;
-        if ( null != iTestState && null == iTestState.getSizeParam() && null == iTestState.getValue() ) {
+        if (ITestParamState.class == clazz) {
+            res = processITestState(iTestContext);
+        } else if ( null != iTestState && null == iTestState.getSizeParam() && null == iTestState.getValue() ) {
             res = null;
         } else if ( null != iTestState && null != iTestState.getAttribute(ITestConstants.REFERENCE_ATTRIBUTE) ) {
             res = iTestContext.findGeneratedObject(iTestState.getAttribute(ITestConstants.REFERENCE_ATTRIBUTE));
@@ -244,6 +246,37 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             fillFields(clazz, res, iTestState, map, iTestContext);
         }
         return (T) res;
+    }
+
+    private ITestParamState processITestState(ITestContext iTestContext) {
+        ITestParamState state = iTestContext.getCurrentParam();
+        ITestParamStateImpl res = null;
+        if (null != state) {
+            res = new ITestParamStateImpl();
+            if (null != state.getAttribute(ITestConstants.REFERENCE_ATTRIBUTE)) {
+                ITestParamState ref = iTestContext.findGeneratedState(state.getAttribute(ITestConstants.REFERENCE_ATTRIBUTE));
+                Collection<String> names = state.getNames();
+                if(null == names || 0 == names.size()){
+                    res.setValue(ref.getValue());
+                    state=res;
+                }else {
+                    state = iTestConfig.getITestParamsMerger().merge(new ITestParamAssignmentImpl("", ref), new ITestParamAssignmentImpl("", state));
+                    iTestContext.replaceCurrentState(state);
+                }
+            }
+            Collection<String> names = state.getNames();
+            if (null != names) {
+                for (String name : names) {
+                    iTestContext.enter(res, name);
+                    ITestParamState element = processITestState(iTestContext);
+                    res.addElement(name, element);
+                    iTestContext.leave(element);
+                }
+            } else {
+                res.setValue(state.getValue());
+            }
+        }
+        return res;
     }
 
     private Class<?> getClassFromParam(ITestParamState iTestState) {
@@ -329,9 +362,9 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
         ITestParamState itestState = iTestContext.getCurrentParam();
         if ( null != itestState && null != itestState.getNames() && o instanceof ITestSuperObject ) {
             ITestSuperObject iTestSuperObject = (ITestSuperObject) o;
-            Type contentType=ITestTypeUtil.getParameterType(o.getClass(),ITestSuperObject.class,0,map);
-            if(null==contentType){
-                contentType= Object.class;
+            Type contentType = ITestTypeUtil.getParameterType(o.getClass(), ITestSuperObject.class, 0, map);
+            if (null == contentType) {
+                contentType = Object.class;
             }
             for (String name : itestState.getNames()) {
                 iTestContext.enter(o, name);

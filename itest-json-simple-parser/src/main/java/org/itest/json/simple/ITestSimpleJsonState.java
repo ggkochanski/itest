@@ -34,7 +34,7 @@ public class ITestSimpleJsonState implements ITestParamState {
 
     private String value;
 
-    private Map<String, ITestSimpleJsonState> elements;
+    private Map<String, ITestParamState> elements;
 
     private Map<String, String> attributes;
 
@@ -117,7 +117,17 @@ public class ITestSimpleJsonState implements ITestParamState {
     private static Map<String, String> emptyMap() {
         return Collections.emptyMap();
     }
-    private static Map<String, ITestSimpleJsonState> createElements(){
-        return new LinkedHashMap<String,ITestSimpleJsonState>();
+    public static Map<String, ITestParamState> createElements(){
+        return new LinkedHashMap<String,ITestParamState>();
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        if (null == elements) {
+            sb.append(":").append(getValue());
+        } else {
+            sb.append(elements);
+        }
+        return sb.toString();
     }
 }

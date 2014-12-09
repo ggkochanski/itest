@@ -65,7 +65,9 @@ public class ITestParamMergerImpl implements ITestParamMerger {
         }
         Collection<String> collectedElements = new TreeSet<String>();
         for (ITestParamState unifiedState : unifiedStates) {
-            collectedElements.addAll(unifiedState.getNames());
+            if(null != unifiedState.getNames()) {
+                collectedElements.addAll(unifiedState.getNames());
+            }
         }
         ITestParamStateImpl mergedState = new ITestParamStateImpl();
         for (String element : collectedElements) {
@@ -97,8 +99,9 @@ public class ITestParamMergerImpl implements ITestParamMerger {
                         parentState.addElement(name, currentState);
                         copyAttributes(currentState, unifiedElements);
                     }
-                    currentState.value = itestState.getValue();
-
+                    if(null==itestState.getNames()) {
+                        currentState.value = itestState.getValue();
+                    }
                 }
             }
         }

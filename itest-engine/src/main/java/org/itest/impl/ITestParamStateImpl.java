@@ -1,5 +1,6 @@
 package org.itest.impl;
 
+import org.itest.json.simple.ITestSimpleJsonState;
 import org.itest.param.ITestParamState;
 
 import java.util.*;
@@ -71,6 +72,9 @@ public class ITestParamStateImpl implements ITestParamState {
         return null == attributes ? null : attributes.keySet();
     }
 
+    public void setValue(String value){
+        this.value=value;
+    }
     private static Map<String, String> emptyMap() {
         return Collections.emptyMap();
     }
@@ -86,6 +90,7 @@ public class ITestParamStateImpl implements ITestParamState {
         return sb.toString();
     }
     private static Map<String,ITestParamState> createElements(){
-        return new LinkedHashMap<String, ITestParamState>();
+        return ITestSimpleJsonState.createElements();
     }
+
 }

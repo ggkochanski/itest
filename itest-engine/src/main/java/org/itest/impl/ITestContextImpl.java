@@ -56,7 +56,7 @@ public class ITestContextImpl implements ITestContext {
     public ITestContextImpl(ITestParamState rootParam, Map<Class<?>, Map<String, String>> staticITestAssignmentMap) {
         this.rootParam = rootParam;
         this.params.add(rootParam);
-        this.rootValueHolder = new ITestValueHolder();
+        this.rootValueHolder = new ITestValueHolder(rootParam);
         this.valueHolders.add(rootValueHolder);
         this.staticITestAssignmentMap = staticITestAssignmentMap;
     }
@@ -85,7 +85,7 @@ public class ITestContextImpl implements ITestContext {
     public void enter(Object owner, String field) {
         getCurrentValueHolder().setValue(owner);
         params.add(null == getCurrentParam() ? null : getCurrentParam().getElement(field));
-        ITestValueHolder vh = new ITestValueHolder();
+        ITestValueHolder vh = new ITestValueHolder(getCurrentParam());
         getCurrentValueHolder().addEelement(field, vh);
         valueHolders.add(vh);
         path.add(field);
@@ -142,7 +142,7 @@ public class ITestContextImpl implements ITestContext {
         return params.get(params.size() - 1);
     }
 
-    public Object findGeneratedObject(String targetPath) {
+    private ITestValueHolder findGeneratedValueHolder(String targetPath) {
         ITestValueHolder res;
         int depth;
         if ( targetPath.startsWith(ITestConstants.SEPARATOR) ) {
@@ -167,20 +167,32 @@ public class ITestContextImpl implements ITestContext {
         if ( null == res ) {
             throw new ITestException("@ref:" + targetPath + " not found");
         }
-        return res.getValue();
+        return res;
     }
 
+    public ITestParamState findGeneratedState(String targetPath) {
+        return findGeneratedValueHolder(targetPath).getParam();
+    }
+
+    public Object findGeneratedObject(String targetPath) {
+        return findGeneratedValueHolder(targetPath).getValue();
+    }
     @Override
     public void replaceCurrentState(ITestParamState iTestState) {
         params.set(params.size() - 1, iTestState);
     }
 
     static class ITestValueHolder {
+        ITestParamState param;
         Object value;
 
         Map<String, ITestValueHolder> elements;
 
         boolean valueSet;
+
+        public ITestValueHolder(ITestParamState currentParam) {
+            this.param = currentParam;
+        }
 
         public void addEelement(String field, ITestValueHolder vh) {
             if ( null == elements ) {
@@ -203,6 +215,10 @@ public class ITestContextImpl implements ITestContext {
                 throw new ITestException("Value not set");
             }
             return value;
+        }
+
+        public ITestParamState getParam() {
+            return param;
         }
     }
 }

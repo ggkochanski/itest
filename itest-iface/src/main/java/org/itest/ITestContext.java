@@ -56,5 +56,7 @@ public interface ITestContext {
 
     Object findGeneratedObject(String path);
 
+    ITestParamState findGeneratedState(String path);
+
     void replaceCurrentState(ITestParamState iTestState);
 }
