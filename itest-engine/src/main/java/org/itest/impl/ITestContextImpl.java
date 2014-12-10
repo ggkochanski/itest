@@ -153,7 +153,7 @@ public class ITestContextImpl implements ITestContext {
         res = valueHolders.get(depth);
         StringTokenizer st = new StringTokenizer(targetPath, ITestConstants.SEPARATOR);
 
-        while (st.hasMoreTokens()) {
+        while (st.hasMoreTokens() && null != res) {
             String token = st.nextToken();
             if ( ITestConstants.PARENT.equals(token) ) {
                 depth--;

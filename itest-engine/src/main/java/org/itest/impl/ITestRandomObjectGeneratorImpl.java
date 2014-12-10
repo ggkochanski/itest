@@ -255,8 +255,7 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             res = new ITestParamStateImpl();
             if (null != state.getAttribute(ITestConstants.REFERENCE_ATTRIBUTE)) {
                 ITestParamState ref = iTestContext.findGeneratedState(state.getAttribute(ITestConstants.REFERENCE_ATTRIBUTE));
-                Collection<String> names = state.getNames();
-                if(null == names || 0 == names.size()){
+                if(null == ref.getNames()){
                     res.setValue(ref.getValue());
                     state=res;
                 }else {
@@ -266,6 +265,7 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             }
             Collection<String> names = state.getNames();
             if (null != names) {
+                res.initElements();
                 for (String name : names) {
                     iTestContext.enter(res, name);
                     ITestParamState element = processITestState(iTestContext);

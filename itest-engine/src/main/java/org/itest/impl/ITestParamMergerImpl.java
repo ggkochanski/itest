@@ -26,16 +26,15 @@
 package org.itest.impl;
 
 import org.itest.ITestConstants;
+import org.itest.json.simple.ITestSimpleJsonState;
 import org.itest.param.ITestParamAssignment;
 import org.itest.param.ITestParamMerger;
 import org.itest.param.ITestParamState;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.StringTokenizer;
-import java.util.TreeSet;
 
 public class ITestParamMergerImpl implements ITestParamMerger {
 
@@ -63,12 +62,7 @@ public class ITestParamMergerImpl implements ITestParamMerger {
         if ( 1 == unifiedStates.size() ) {
             return unifiedStates.iterator().next();
         }
-        Collection<String> collectedElements = new TreeSet<String>();
-        for (ITestParamState unifiedState : unifiedStates) {
-            if(null != unifiedState.getNames()) {
-                collectedElements.addAll(unifiedState.getNames());
-            }
-        }
+        Collection<String> collectedElements = collectAllNames(unifiedStates);
         ITestParamStateImpl mergedState = new ITestParamStateImpl();
         for (String element : collectedElements) {
             merge(element, mergedState, unifiedStates);
@@ -82,10 +76,10 @@ public class ITestParamMergerImpl implements ITestParamMerger {
         for (ITestParamState itestState : unifiedStates) {
             unifiedElements.add(null == itestState ? null : itestState.getElement(name));
         }
-        Iterable<String> allNamesIterable = getAllNamesInterable(unifiedElements);
+        Iterable<String> allNamesIterable = collectAllNames(unifiedElements);
         if ( null != allNamesIterable ) {
             currentState = new ITestParamStateImpl();
-            currentState.elements = new HashMap<String, ITestParamState>();
+            currentState.elements = ITestSimpleJsonState.createElements();
             copyAttributes(currentState, unifiedElements);
             parentState.addElement(name, currentState);
             for (String elementName : allNamesIterable) {
@@ -121,18 +115,16 @@ public class ITestParamMergerImpl implements ITestParamMerger {
         }
     }
 
-    private Iterable<String> getAllNamesInterable(Collection<ITestParamState> unifiedElements) {
+    private Collection<String> collectAllNames(Collection<ITestParamState> unifiedElements) {
         Collection<String> res = null;
         for (ITestParamState state : unifiedElements) {
             if ( null != state ) {
-                Iterable<String> names = state.getNames();
+                Collection<String> names = state.getNames();
                 if ( names != null ) {
                     if ( null == res ) {
-                        res = new HashSet<String>();
+                        res = new LinkedHashSet<String>();
                     }
-                    for (String name : names) {
-                        res.add(name);
-                    }
+                    res.addAll(names);
                 }
             }
         }

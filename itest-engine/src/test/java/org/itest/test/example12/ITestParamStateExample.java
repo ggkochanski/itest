@@ -19,8 +19,37 @@ public class ITestParamStateExample {
         Assert.assertEquals("20",s2.getElement("b").getElement("1").getValue());
     }
 
+    @ITests({@ITest(init = "A:[null]", verify = "A:[{elements:null}]"),
+            @ITest(init = "A:[{_:null}]", verify = "A:[{elements:null}]")})
+    public void nullStateTest(ITestParamState s) {
+        Assert.assertNotNull(s);
+        Assert.assertNull(s.getNames());
+        Assert.assertNull(s.getValue());
+    }
+
+    @ITests({@ITest(init = "A:[{}]", verify = "A:[{elements:{}}]")})
+    public void emptyStateTest(ITestParamState s) {
+        Assert.assertNotNull(s);
+        Assert.assertNotNull(s.getNames());
+        Assert.assertNull(s.getValue());
+    }
+
+    @ITests(@ITest(init = "A:[{s:null}]", verify = "A:[{s:{elements:null}}]"))
+    public void nullStateTestInClass(SomeClass c) {
+        Assert.assertNotNull(c.s);
+        Assert.assertNull(c.s.getNames());
+        Assert.assertNull(c.s.getValue());
+    }
+    @ITests(@ITest(init = "A:[{s:{}}]", verify = "A:[{s:{elements:{}}}]"))
+    public void emptyStateTestInClass(SomeClass c) {
+        Assert.assertNotNull(c.s);
+        Assert.assertNotNull(c.s.getNames());
+        Assert.assertNull(c.s.getValue());
+    }
+
     static class SomeClass {
         String a;
         int[] b;
+        ITestParamState s;
     }
 }

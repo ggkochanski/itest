@@ -62,10 +62,10 @@ public class ITestExecutionVerifierImpl implements ITestExecutionVerifier {
             verifyClass(name,stateParam.getAttribute(ITestConstants.ATTRIBUTE_CLASS),resultObject,res);
 
             if ( null == stateParam.getNames() ) {
-                if ( null == stateParam.getValue() ) {
+                if (null == stateParam.getValue()) {
                     testResult = (null == resultObject);
                     res.add(new ITestFieldVerificationResultImpl(name, null, resultObject, testResult, null));
-                } else if ( null == resultObject ) {
+                } else if (null == resultObject) {
                     res.add(new ITestFieldVerificationResultImpl(name, stateParam.getValue(), null, false, null));
                 } else {
                     Object expectedValue = iTestConfig.getITestValueConverter().convert(resultObject.getClass(), stateParam.getValue());
@@ -137,8 +137,8 @@ public class ITestExecutionVerifierImpl implements ITestExecutionVerifier {
                     }
                 }
             } else {
-                Iterable<String> fNames = stateParam.getNames();
-                if ( null != fNames ) {
+                Collection<String> fNames = stateParam.getNames();
+                if (fNames.size() > 0) {
                     for (String fName : stateParam.getNames()) {
                         try {
                             verify(res, name + "." + fName, getField(resultObject, fName), stateParam.getElement(fName));
@@ -146,6 +146,8 @@ public class ITestExecutionVerifierImpl implements ITestExecutionVerifier {
                             res.add(new ITestFieldVerificationResultImpl(name + "." + fName, stateParam.getElement(fName), null, false, e.getMessage()));
                         }
                     }
+                } else {
+                    res.add(new ITestFieldVerificationResultImpl(name, "{}", resultObject, resultObject != null, null));
                 }
                 // throw new ITestVerificationException("Type (" + itestObject.getClass().getName() + ") not recognized (" + itestObject + ")", null);
             }

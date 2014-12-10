@@ -3,7 +3,10 @@ package org.itest.impl;
 import org.itest.json.simple.ITestSimpleJsonState;
 import org.itest.param.ITestParamState;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ITestParamStateImpl implements ITestParamState {
     protected Map<String, ITestParamState> elements;
@@ -79,6 +82,11 @@ public class ITestParamStateImpl implements ITestParamState {
         return Collections.emptyMap();
     }
 
+    public void initElements() {
+        if (null == elements) {
+            elements = createElements();
+        }
+    }
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
