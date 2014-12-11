@@ -1,4 +1,4 @@
-package org.itest.scenario;
+package org.itest.scenario.util;
 
 import org.itest.ITestSuperObject;
 
@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Created by rumcajs on 11/18/14.
  */
-public class ITestScenarioParamsHolder implements ITestSuperObject {
+public class ITestSuperObjectHolder<T> implements ITestSuperObject<T> {
     private Map<String, Object> map = new HashMap<String, Object>();
 
     @Override

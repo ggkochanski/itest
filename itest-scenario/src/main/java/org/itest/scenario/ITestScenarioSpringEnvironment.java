@@ -17,13 +17,13 @@ public class ITestScenarioSpringEnvironment extends ITestScenarioEnvironment {
     }
 
     @Override
-    public Object execute(ITestScenarioAction action, Object[] args) {
+    public Object execute(String name, ITestScenarioAction action, Object[] args) {
         try {
             Object bean = ctx.getBean(action.getName());
             Method m = bean.getClass().getMethod(action.getMethodName(), action.getParamTypes());
             return m.invoke(bean, args);
         } catch (Exception e) {
-            throw new ITestException("Error executing action (" + action + ") for params (" + Arrays.asList(args) + ")", e);
+            throw new ITestException("Error executing action "+name+" (" + action + ") for params (" + Arrays.asList(args) + ")", e);
         }
     }
 }

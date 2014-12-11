@@ -25,6 +25,7 @@
  */
 package org.itest.impl;
 
+import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.itest.exception.ITestException;
 import org.itest.exception.ITestInitializationException;
@@ -70,7 +71,7 @@ public class ITestValueConverterImpl implements ITestValueConverter {
             res = Enum.valueOf((Class<Enum>) clazz, value);
         } else if ( Class.class == clazz ) {
             try {
-                res = Class.forName(value);
+                res = ClassUtils.getClass(getClass().getClassLoader(),value);
             } catch (ClassNotFoundException e) {
                 throw new ITestInitializationException(value, e);
             }

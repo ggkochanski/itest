@@ -14,14 +14,14 @@ public class ITestScenarioReflectionEnvironment extends ITestScenarioEnvironment
     private Map<String, Object> fields = new HashMap<String, Object>();
 
     @Override
-    public Object execute(ITestScenarioAction action, Object[] args) {
+    public Object execute(String name,ITestScenarioAction action, Object[] args) {
         try {
             Object target = fields.get(action.getName());
             Method m = target.getClass().getMethod(action.getMethodName(), action.getParamTypes());
             Object result = m.invoke(target, args);
             return result;
         } catch (Exception e) {
-            throw new ITestException("Error executing action (" + action + ")", e);
+            throw new ITestException("Error executing action "+name+" (" + action + ")", e);
         }
     }
 
