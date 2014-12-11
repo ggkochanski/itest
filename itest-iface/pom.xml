@@ -8,7 +8,7 @@
 	</parent>
 	<groupId>org.itest</groupId>
 	<artifactId>itest-iface</artifactId>
-	<version>1.4.0</version>
+	<version>1.4.1-SNAPSHOT</version>
 	<name>itest-iface</name>
 	<url>https://github.com/ggkochanski/itest/</url>
 	<properties>
