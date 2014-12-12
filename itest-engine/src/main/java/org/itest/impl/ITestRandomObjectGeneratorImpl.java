@@ -107,7 +107,7 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             res = iTestConfig.getITestValueConverter().convert(clazz, iTestState.getValue());
         } else if (Void.class == clazz || void.class == clazz) {
             res = null;
-        } else if (String.class == clazz) {
+        } else if (String.class == clazz && (null == iTestState || null == iTestState.getNames())) {
             res = RandomStringUtils.randomAlphanumeric(20);
         } else if (Long.class == clazz || long.class == clazz) {
             res = new Long(random.nextLong());
@@ -261,6 +261,12 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
                 }else {
                     state = iTestConfig.getITestParamsMerger().merge(new ITestParamAssignmentImpl("", ref), new ITestParamAssignmentImpl("", state));
                     iTestContext.replaceCurrentState(state);
+                }
+            }
+            Iterable<String> attributes = state.getAttributeNames();
+            if (null != attributes) {
+                for (String attribute : attributes) {
+                    res.addAttribute(attribute, state.getAttribute(attribute));
                 }
             }
             Collection<String> names = state.getNames();

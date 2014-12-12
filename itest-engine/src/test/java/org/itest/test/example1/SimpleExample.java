@@ -94,4 +94,8 @@ public class SimpleExample {
         Assert.assertEquals(java.util.Date.class, utilDate.getClass());
         return timestamp.getTime() + time.getTime() + sqlDate.getTime() + utilDate.getTime()+anyDate.getTime();
     }
+    @ITests(@ITest(init="A:[{value:[a,b,c],offset:0,count:3}]",verify = "R:abc"))
+    public String setString(String s){
+        return s;
+    }
 }
