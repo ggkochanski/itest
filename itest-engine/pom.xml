@@ -8,7 +8,7 @@
 	</parent>
 	<groupId>org.itest</groupId>
 	<artifactId>itest-engine</artifactId>
-	<version>1.4.1-SNAPSHOT</version>
+	<version>1.4.1</version>
 	<name>itest-engine</name>
 	<url>https://github.com/ggkochanski/itest/</url>
 	<dependencies>
