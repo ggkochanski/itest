@@ -29,10 +29,7 @@ public class ITestScenarioExecUtil {
             Entry<String, Action> entry = (Entry<String, Action>) e;
             Action action = (Action) entry.getValue();
 
-            if (null == action.getParams()) {
-                throw new ITestException("Params not specified for action:" + action);
-            }
-            Object[] args = new Object[action.getParams().length];
+            Object[] args = new Object[null==action.getParams()?0:action.getParams().length];
             for (int i = 0; i < args.length; i++) {
                 args[i] = parseParamValue(experiment.getParams(), action.getParams()[i]);
             }
