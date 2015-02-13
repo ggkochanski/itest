@@ -1,22 +1,21 @@
 package org.itest.json.simple.format;
 
+import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.itest.util.reflection.ITestFieldUtil;
 import org.itest.util.reflection.ITestFieldUtil.FieldHolder;
-import org.itest.util.reflection.ITestTypeUtil;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,14 +45,13 @@ public class SimpleJsonFormatter {
         try {
             List<String> stack = new ArrayList<String>();
             stack.add("T");
-            Map<String, Type> map = ITestTypeUtil.getTypeMap((Type) o.getClass(), new HashMap<String, Type>());
-            format(o, Object.class, map, out, "\t", "\n", stack, new IdentityHashMap<Object, List<String>>());
+            format(o, TypeToken.of(Object.class), out, "\t", "\n", stack, new IdentityHashMap<Object, List<String>>());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void format(Object o, Type expectedType, Map<String, Type> typeMap, Appendable out, String indent, String newLine, List<String> stack,
+    private void format(Object o, TypeToken expectedType, Appendable out, String indent, String newLine, List<String> stack,
                         Map<Object, List<String>> visited) throws Exception {
         if (stack.size() > 20) {
             System.out.println(stack);
@@ -62,17 +60,12 @@ public class SimpleJsonFormatter {
         if (formatValue(o, expectedType, out)) {
 
         } else if (null != (path = visited.get(o))) {
-            out.append("{@ref:").append(formatPath(stack, path)).append("}");
+            out.append("{\"@ref\":\"").append(formatPath(stack, path)).append("\"}");
         } else {
             visited.put(o, new ArrayList<String>(stack));
             Class<?> targetClass = simpleFormatterConfig.translateClass(o.getClass());
             if(o.getClass().isArray()) {
-                Type elementType;
-                if(expectedType instanceof GenericArrayType){
-                    elementType=ITestTypeUtil.getTypeProxy(((GenericArrayType)expectedType).getGenericComponentType(),typeMap);
-                }else{
-                    elementType=ITestTypeUtil.getRawClass(expectedType).getComponentType();
-                }
+                TypeToken elementType=expectedType.getComponentType();
                 int length= Array.getLength(o);
                 if(0==length){
                     out.append("[]");
@@ -83,20 +76,18 @@ public class SimpleJsonFormatter {
                             out.append(',');
                         }
                         stack.add(String.valueOf(i));
-                        format(Array.get(o,i),elementType,typeMap,out,indent,newLine,stack,visited);
+                        format(Array.get(o,i),elementType,out,indent,newLine,stack,visited);
                         stack.remove(stack.size()-1);
                     }
                     out.append("]");
                 }
             }else if (o instanceof Collection) {
                 Collection<Object> list = (Collection) o;
-                Type elementType;
-                elementType = defaultIfNull(ITestTypeUtil.getParameterType(expectedType, Collection.class, 0, typeMap), Object.class);
-                elementType = ITestTypeUtil.getTypeProxy(elementType, typeMap);
+                TypeToken elementType=resolveParametrizedType(expectedType,Collection.class,0);
 
-                Type mapType = ITestTypeUtil.getRawClass(ITestTypeUtil.getTypeProxy(expectedType, typeMap));
-                if ( mapType != targetClass ) {
-                    out.append("{@class:").append(targetClass.getName()).append(",_:");
+                Type expectedRawType=expectedType.getRawType();
+                if (expectedRawType!= targetClass ) {
+                    out.append("{\"@class\":\"").append(targetClass.getName()).append("\",\"_\":");
                 }
 
                 if (0 == list.size()) {
@@ -109,39 +100,39 @@ public class SimpleJsonFormatter {
                             out.append(',');
                         }
                         stack.add(String.valueOf(i++));
-                        format(element, elementType, typeMap, out, indent, newLine, stack, visited);
+                        format(element, elementType, out, indent, newLine, stack, visited);
                         stack.remove(stack.size() - 1);
                     }
                     out.append(']');
                 }
-                if ( mapType != targetClass ) {
+                if ( expectedRawType != targetClass ) {
                     out.append("}");
                 }
             } else if (o instanceof Map) {
-                Type mapType = ITestTypeUtil.getRawClass(ITestTypeUtil.getTypeProxy(expectedType, typeMap));
+                Type mapType = expectedType.getRawType();
                 if ( mapType != targetClass ) {
-                    out.append("{@class:").append(targetClass.getName()).append(",_:");
+                    out.append("{\"@class\":\"").append(targetClass.getName()).append("\",\"_\":");
                 }
                 Map<Object, Object> map = (Map<Object, Object>) o;
                 if (0 == map.size()) {
                     out.append("[]");
                 } else {
                     out.append('[');
-                    Type keyType = defaultIfNull(ITestTypeUtil.getParameterType(expectedType, Map.class, 0, typeMap), Object.class);
-                    Type valueType = defaultIfNull(ITestTypeUtil.getParameterType(expectedType, Map.class, 1, typeMap), Object.class);
+                    TypeToken keyType = resolveParametrizedType(expectedType,Map.class,0);
+                    TypeToken valueType = resolveParametrizedType(expectedType,Map.class,1);
                     List<Map.Entry<Object, Object>> entries = new ArrayList<Map.Entry<Object, Object>>(map.entrySet());
                     for (int i = 0; i < map.size(); i++) {
                         if (i > 0) {
                             out.append(',');
                         }
                         stack.add(String.valueOf(i));
-                        out.append("{key:");
+                        out.append("{\"key\":");
                         stack.add("key");
-                        format(entries.get(i).getKey(), keyType, typeMap, out, indent, newLine, stack, visited);
+                        format(entries.get(i).getKey(), keyType,  out, indent, newLine, stack, visited);
                         stack.remove(stack.size() - 1);
-                        out.append(",value:");
+                        out.append(",\"value\":");
                         stack.add("value");
-                        format(entries.get(i).getValue(), valueType, typeMap, out, indent, newLine, stack, visited);
+                        format(entries.get(i).getValue(), valueType,  out, indent, newLine, stack, visited);
                         out.append("}");
                         stack.remove(stack.size() - 1);
                         stack.remove(stack.size() - 1);
@@ -153,23 +144,23 @@ public class SimpleJsonFormatter {
                     out.append("}");
                 }
             } else {
-                try {
-                    typeMap = ITestTypeUtil.getTypeMap(expectedType, typeMap);
-                } catch (RuntimeException e) {
-                    throw e;
-                }
-                Collection<FieldHolder> fields = ITestFieldUtil.collectFields(o.getClass(), typeMap);
-                if (0 == fields.size() && o.getClass() == expectedType) {
+                Collection<FieldHolder> fields = ITestFieldUtil.collectFields(o.getClass(), Collections.EMPTY_MAP);
+                if (0 == fields.size() && o.getClass() == expectedType.getRawType()) {
                     out.append("{}");
                 } else {
                     out.append('{').append(newLine);
                     boolean separator = false;
-                    if ( ITestTypeUtil.getRawClass(expectedType) != targetClass ) {
+                    if(null == expectedType){
+                        System.out.println();
+                    }
+                    if ( expectedType.getRawType()!= targetClass ) {
                         for (int i = 0; i < stack.size(); i++) {
                             out.append(indent);
                         }
-                        out.append("@class:").append(targetClass.getName());
+                        out.append("\"@class\":\"").append(targetClass.getName()).append('"');
                         separator = true;
+                        //type for class lost, restoring
+                        //expectedType=TypeToken.of(targetClass);
                     }
                     for (FieldHolder f : fields) {
                         f.getField().setAccessible(true);
@@ -181,10 +172,10 @@ public class SimpleJsonFormatter {
                         for (int i = 0; i < stack.size(); i++) {
                             out.append(indent);
                         }
-                        out.append(f.getField().getName()).append(':');
+                        out.append('"').append(f.getField().getName()).append("\":");
                         stack.add(f.getField().getName());
-                        Type fType = ITestTypeUtil.getTypeProxy(f.getField().getGenericType(), f.getTypeMap());
-                        format(f.getField().get(o), fType, f.getTypeMap(), out, indent, newLine, stack, visited);
+                        TypeToken fType = expectedType.resolveType(f.getField().getGenericType());
+                        format(f.getField().get(o), fType, out, indent, newLine, stack, visited);
                         stack.remove(stack.size() - 1);
                     }
                     out.append(newLine);
@@ -195,10 +186,6 @@ public class SimpleJsonFormatter {
                 }
             }
         }
-    }
-
-    private <T> T defaultIfNull(T object, T defaultObject) {
-        return object == null ? defaultObject : object;
     }
 
     private String formatPath(List<String> stack, List<String> path) {
@@ -233,7 +220,7 @@ public class SimpleJsonFormatter {
         return fields;
     }
 
-    private boolean formatValue(Object object, Type t, Appendable out) throws IOException {
+    private boolean formatValue(Object object, TypeToken t, Appendable out) throws IOException {
         boolean res = true;
         if (null == object) {
             out.append("null");
@@ -242,21 +229,31 @@ public class SimpleJsonFormatter {
             if (object instanceof Number || object instanceof Boolean) {
                 value = object.toString();
             } else if (object instanceof Character || object instanceof String) {
-                value = '\'' + StringEscapeUtils.escapeJava(object.toString()) + '\'';
+                value = '\"' + StringEscapeUtils.escapeJava(object.toString()) + '\"';
             } else if (object instanceof Date) {
                 value = String.valueOf(((Date) object).getTime());
             } else if (object instanceof Enum) {
-                value = ((Enum<?>) object).name();
+                value = '"'+((Enum<?>) object).name()+'"';
             } else {
                 res = false;
             }
             if (res) {
-                if (getWrapper(t) != object.getClass()) {
-                    out.append("{@class:").append(object.getClass().getName()).append(",_:").append(value).append("}");
+                if (getWrapper(t.getRawType()) != object.getClass()) {
+                    out.append("{\"@class\":\"").append(object.getClass().getName()).append("\",\"_\":").append(value).append("}");
                 } else {
                     out.append(value);
                 }
             }
+        }
+        return res;
+    }
+
+    TypeToken resolveParametrizedType(TypeToken typeToken,Class clazz,int param){
+        TypeToken res;
+        if(clazz.isAssignableFrom(typeToken.getRawType())){
+            res=typeToken.getSupertype(clazz).resolveType(clazz.getTypeParameters()[param]);
+        }else{
+            res=TypeToken.of(Object.class);
         }
         return res;
     }
