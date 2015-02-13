@@ -452,6 +452,11 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
         int size = random.nextInt(RANDOM_MAX - RANDOM_MIN) + RANDOM_MIN;
         if (null != iTestState && iTestState.getSizeParam() != null) {
             size = iTestState.getSizeParam();
+            //to overwrite expected value
+            if (0 == size) {
+                iTestContext.enter(m, "<map>");
+                iTestContext.leave(null);
+            }
         }
         for (int i = 0; i < size; i++) {
             iTestContext.enter(m, String.valueOf(i));
@@ -482,9 +487,9 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             col = (Collection<Object>) newInstance(collectionClass, iTestContext);
         } else {
             if ( Set.class.isAssignableFrom(collectionClass) ) {
-                col = new HashSet<Object>();
+                col = (Collection<Object>) newInstance(HashSet.class, iTestContext);
             } else {
-                col = new ArrayList<Object>();
+                col = (Collection<Object>) newInstance(ArrayList.class, iTestContext);
             }
         }
         if ( null == col ) {
@@ -494,6 +499,11 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
         int size = random.nextInt(RANDOM_MAX - RANDOM_MIN) + RANDOM_MIN;
         if (null != iTestState && iTestState.getSizeParam() != null) {
             size = iTestState.getSizeParam();
+            //to overwrite expected value
+            if (0 == size) {
+                iTestContext.enter(col, "<col>");
+                iTestContext.leave(null);
+            }
         }
 
         Type elementType=ITestTypeUtil.getTypeProxy(ITestTypeUtil.getParameterType(type,Collection.class,0,map),map);
