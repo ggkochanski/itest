@@ -8,7 +8,7 @@
 	</parent>
 	<groupId>org.itest</groupId>
 	<artifactId>itest-json-simple-parser</artifactId>
-	<version>1.4.2</version>
+	<version>1.4.3</version>
 	<name>itest-simplified-json-parser</name>
 	<url>https://github.com/ggkochanski/itest/</url>
 	<dependencies>

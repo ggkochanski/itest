@@ -226,6 +226,7 @@ public class SimpleJsonFormatter {
             out.append("null");
         } else {
             String value = null;
+            Class<?> clazz=object.getClass();
             if (object instanceof Number || object instanceof Boolean) {
                 value = object.toString();
             } else if (object instanceof Character || object instanceof String) {
@@ -233,13 +234,16 @@ public class SimpleJsonFormatter {
             } else if (object instanceof Date) {
                 value = String.valueOf(((Date) object).getTime());
             } else if (object instanceof Enum) {
-                value = '"'+((Enum<?>) object).name()+'"';
+                value = '"' + ((Enum<?>) object).name() + '"';
+                if(!clazz.isEnum() && null!= clazz.getSuperclass() && clazz.getSuperclass().isEnum()){
+                    clazz=clazz.getSuperclass();
+                }
             } else {
                 res = false;
             }
             if (res) {
-                if (getWrapper(t.getRawType()) != object.getClass()) {
-                    out.append("{\"@class\":\"").append(object.getClass().getName()).append("\",\"_\":").append(value).append("}");
+                if (getWrapper(t.getRawType()) != clazz) {
+                    out.append("{\"@class\":\"").append(clazz.getName()).append("\",\"_\":").append(value).append("}");
                 } else {
                     out.append(value);
                 }
