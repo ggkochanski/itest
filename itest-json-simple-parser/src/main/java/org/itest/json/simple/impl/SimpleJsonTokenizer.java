@@ -96,10 +96,17 @@ public class SimpleJsonTokenizer {
     public String stringTill(char quote) throws SimpleJsonException {
         StringBuilder sb = new StringBuilder();
         char c;
+        boolean escapeNext=false;
         while (true) {
             c = next();
             if ( 0 == c ) {
                 throw syntaxError("Unterminated string");
+            } if(escapeNext){
+                sb.append(c);
+                escapeNext=false;
+            } else if ('\\' == c){
+                sb.append(c);
+                escapeNext=true;
             } else if ( quote == c ) {
                 return sb.toString();
             } else {

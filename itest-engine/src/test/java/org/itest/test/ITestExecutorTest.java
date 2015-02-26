@@ -41,6 +41,7 @@ import org.itest.test.example5.DataProviderExample;
 import org.itest.test.example7.ExternalTestDefinition;
 import org.itest.test.example8.ReferenceExample;
 import org.itest.test.example9.ValueClassExample;
+import org.itest.test.issue.ITestJsonEscapeTest;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -71,8 +72,8 @@ public class ITestExecutorTest {
     }
 
     void performTests(ITestExecutor executor) {
-        Assert.assertEquals("", executor.performTestsFor(76, SimpleExample.class, InterfaceExample.class, ReuseTestDataExample.class, CollectionsExample.class,
+        Assert.assertEquals("", executor.performTestsFor(81, SimpleExample.class, InterfaceExample.class, ReuseTestDataExample.class, CollectionsExample.class,
                 DataProviderExample.class, ExternalTestDefinition.class, ReferenceExample.class, ValueClassExample.class, LazyLoadedDefinitionExample.class,
-                ITestSuperObjectExample.class, ITestParamStateExample.class));
+                ITestSuperObjectExample.class, ITestParamStateExample.class, ITestJsonEscapeTest.class));
     }
 }

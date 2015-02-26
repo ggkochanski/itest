@@ -25,6 +25,7 @@
  */
 package org.itest.test;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.itest.json.simple.impl.SimpleJsonParser;
 import org.itest.json.simple.impl.SimpleJsonState;
 import org.junit.Assert;
@@ -38,5 +39,19 @@ public class SimpleJsonTest {
         Assert.assertEquals(null, o.get("t").get("3"));
         Assert.assertEquals("4", o.get("t").get("4").getValue());
         Assert.assertEquals(null, o.get("t").get("5").getValue());
+    }
+
+    private static final String[] escapeExamples = new String[]{
+            "abc", "abc'", "abc\""
+    };
+
+    @Test
+    public void escapeTest() {
+        for (String example : escapeExamples) {
+            String s = StringEscapeUtils.escapeJava(example);
+            SimpleJsonState o2 = SimpleJsonParser.readFrom("{a:\"" + s + "\"}");
+            Assert.assertEquals(example.length(), StringEscapeUtils.unescapeJava(o2.get("a").getValue()).length());
+
+        }
     }
 }
