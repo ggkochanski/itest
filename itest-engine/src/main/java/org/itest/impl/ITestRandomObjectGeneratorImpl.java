@@ -228,7 +228,12 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             Type enumType = typeToken.resolveType(clazz.getTypeParameters()[0]).getType();
             res = generateRandom(enumType, iTestContext);
         } else {
-            res = newInstance(clazz, iTestContext);
+            Type[] typeParameters=clazz.getTypeParameters();
+            Type[] actualTypeParameters=new Type[typeParameters.length];
+            for(int i=0;i<typeParameters.length;i++){
+                actualTypeParameters[i]=typeToken.resolveType(typeParameters[i]).getType();
+            }
+            res = newInstance(clazz, iTestContext,actualTypeParameters);
             fillFields(type, res, iTestContext);
         }
         return (T) res;
