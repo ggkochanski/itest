@@ -32,7 +32,7 @@ public class ObjectGenerationTest {
                 new ITestParamAssignmentImpl("T:persons:1=T", p2) //
                 ).getElement(ITestConstants.THIS);
 
-        Group g = (Group) itestConfig.getITestObjectGenerator().generate(Group.class, mergedParams, Collections.EMPTY_MAP,
+        Group g = (Group) itestConfig.getITestObjectGenerator().generate(Group.class, mergedParams,
                 new ITestContextImpl(mergedParams,Collections.EMPTY_MAP));
         Assert.assertEquals("g1", g.name);
         Assert.assertEquals(2, g.persons.size());

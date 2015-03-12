@@ -45,7 +45,7 @@ public class ITestRandomObjectImplTest {
         ITestParamState params = parser.parse("'arg':[{'name':'name1','classes':[{},{'name':'class1'},{},{}]}]");
         ITestParamState p=params.getElement("arg").getElement(String.valueOf(0));
         ITestContext ctx = new ITestContextImpl(p,Collections.EMPTY_MAP);
-        Person person = (Person) g.generate(Person.class, p, null, ctx);
+        Person person = (Person) g.generate(Person.class, p,  ctx);
         Assert.assertEquals("name1", person.name);
         Assert.assertEquals(4, person.classes.length);
         Assert.assertEquals("class1", person.classes[1].name);

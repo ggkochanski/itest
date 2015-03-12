@@ -58,12 +58,12 @@ public class ITestMethodExecutorImpl implements ITestMethodExecutor {
         ITestParamState paramState = itestPathDefinition.getInitParams();
         paramState=addElementIfMissing(paramState, ITestConstants.THIS, ITestRandomObjectGeneratorImpl.EMPTY_STATE);
 
-        Map<String, Type> itestGenericMap = itestPathDefinition.getITestGenericMap();
+        //Map<String, Type> itestGenericMap = itestPathDefinition.getITestGenericMap();
         Map<Class<?>, Map<String, String>> staticAssignments = itestPathDefinition.getITestStaticAssignments();
         ITestContext iTestContext = new ITestContextImpl(paramState,itestPathDefinition.getITestStaticAssignments());
         ITestMethodExecutionResult itestData = new ITestMethodExecutionResult();
         iTestContext.enter(itestData, ITestConstants.THIS);
-        Object itestObject = iTestConfig.getITestObjectGenerator().generate(clazz, paramState.getElement(ITestConstants.THIS), itestGenericMap, iTestContext);
+        Object itestObject = iTestConfig.getITestObjectGenerator().generate(clazz, paramState.getElement(ITestConstants.THIS), iTestContext);
         iTestContext.leave(itestObject);
         itestData.T = itestObject;
 
@@ -76,7 +76,7 @@ public class ITestMethodExecutorImpl implements ITestMethodExecutor {
             try {
                 iTestContext.enter(parameters, String.valueOf(i));
                 parameters[i] = iTestConfig.getITestObjectGenerator().generate(parameterTypes[i],
-                        argState == null ? null : argState.getElement(String.valueOf(i)), itestGenericMap, iTestContext);
+                        argState == null ? null : argState.getElement(String.valueOf(i)),  iTestContext);
                 iTestContext.leave(parameters[i]);
             } catch (ITestException e) {
                 e.addPrefix(method + " arg[" + i + "]: ");

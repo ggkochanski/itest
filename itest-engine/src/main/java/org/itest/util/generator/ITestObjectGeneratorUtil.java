@@ -19,7 +19,7 @@ public class ITestObjectGeneratorUtil {
             iTestParamAssignments[i] = new ITestParamAssignmentImpl(definitions[i].getTransform(), params);
         }
         ITestParamState merged = iTestConfig.getITestParamsMerger().merge(iTestParamAssignments).getElement(ITestConstants.THIS);
-        res = (T) iTestConfig.getITestObjectGenerator().generate(clazz, merged, Collections.EMPTY_MAP, new ITestContextImpl(merged,Collections.EMPTY_MAP));
+        res = (T) iTestConfig.getITestObjectGenerator().generate(clazz, merged, new ITestContextImpl(merged, Collections.EMPTY_MAP));
         return res;
     }
 }

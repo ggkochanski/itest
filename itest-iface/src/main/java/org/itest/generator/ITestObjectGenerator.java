@@ -25,12 +25,13 @@
  */
 package org.itest.generator;
 
-import java.lang.reflect.Type;
-import java.util.Map;
-
 import org.itest.ITestContext;
 import org.itest.param.ITestParamState;
 
+import java.lang.reflect.Type;
+
 public interface ITestObjectGenerator {
-    Object generate(Type type, ITestParamState initParam, Map<String, Type> itestGenericMap, ITestContext itestContext);
+
+    Object generate(Type type, ITestParamState initParam, ITestContext itestContext);
+
 }

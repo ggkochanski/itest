@@ -59,7 +59,7 @@ public class ITestScenarioExecUtil {
 
     public static <T> T generateITestObject(Class<T> clazz, String name, ITestConfig iTestConfig) {
         ITestParamState param = iTestConfig.getITestParamLoader().loadITestParam(clazz, name).getElement(ITestConstants.THIS);
-        return (T) iTestConfig.getITestObjectGenerator().generate(clazz, param, Collections.EMPTY_MAP, new ITestContextImpl(param, Collections.EMPTY_MAP));
+        return (T) iTestConfig.getITestObjectGenerator().generate(clazz, param,  new ITestContextImpl(param, Collections.EMPTY_MAP));
     }
 
     private static Object parseParamValue(ITestSuperObjectHolder<Object> params, String paramName) {

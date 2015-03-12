@@ -3,8 +3,9 @@ package org.itest.json.simple.format;
 import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.itest.util.reflection.ITestFieldUtil;
-import org.itest.util.reflection.ITestFieldUtil.FieldHolder;
+import org.itest.util.reflection.ITestFieldProvider;
+import org.itest.util.reflection.ITestFieldProvider.FieldHolder;
+import org.itest.util.reflection.ITestTypeTokenProvider;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
@@ -13,7 +14,6 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.IdentityHashMap;
@@ -32,6 +32,9 @@ public class SimpleJsonFormatter {
     };
 
     private final SimpleJsonFormatterConfig simpleFormatterConfig;
+
+    private final ITestTypeTokenProvider typeTokenProvider=new ITestTypeTokenProvider();
+    private final ITestFieldProvider iTestFieldProvider=new ITestFieldProvider(typeTokenProvider);
 
     public SimpleJsonFormatter() {
         this(new SimpleJsonFormatterConfig());
@@ -110,7 +113,7 @@ public class SimpleJsonFormatter {
                 }
             } else if (o instanceof Map) {
                 Type mapType = expectedType.getRawType();
-                if ( mapType != targetClass ) {
+                if (mapType != targetClass) {
                     out.append("{\"@class\":\"").append(targetClass.getName()).append("\",\"_\":");
                 }
                 Map<Object, Object> map = (Map<Object, Object>) o;
@@ -118,8 +121,8 @@ public class SimpleJsonFormatter {
                     out.append("[]");
                 } else {
                     out.append('[');
-                    TypeToken keyType = resolveParametrizedType(expectedType,Map.class,0);
-                    TypeToken valueType = resolveParametrizedType(expectedType,Map.class,1);
+                    TypeToken keyType = resolveParametrizedType(expectedType, Map.class, 0);
+                    TypeToken valueType = resolveParametrizedType(expectedType, Map.class, 1);
                     List<Map.Entry<Object, Object>> entries = new ArrayList<Map.Entry<Object, Object>>(map.entrySet());
                     for (int i = 0; i < map.size(); i++) {
                         if (i > 0) {
@@ -128,11 +131,11 @@ public class SimpleJsonFormatter {
                         stack.add(String.valueOf(i));
                         out.append("{\"key\":");
                         stack.add("key");
-                        format(entries.get(i).getKey(), keyType,  out, indent, newLine, stack, visited);
+                        format(entries.get(i).getKey(), keyType, out, indent, newLine, stack, visited);
                         stack.remove(stack.size() - 1);
                         out.append(",\"value\":");
                         stack.add("value");
-                        format(entries.get(i).getValue(), valueType,  out, indent, newLine, stack, visited);
+                        format(entries.get(i).getValue(), valueType, out, indent, newLine, stack, visited);
                         out.append("}");
                         stack.remove(stack.size() - 1);
                         stack.remove(stack.size() - 1);
@@ -140,11 +143,14 @@ public class SimpleJsonFormatter {
                     }
                     out.append(']');
                 }
-                if ( mapType != targetClass ) {
+                if (mapType != targetClass) {
                     out.append("}");
                 }
+            } else if (Class.class == o.getClass()) {
+                Class oClass=(Class)o;
+                out.append("{\"@class\":\"java.lang.Class\",\"_\":\""+oClass.getName()+"\"}");
             } else {
-                Collection<FieldHolder> fields = ITestFieldUtil.collectFields(o.getClass(), Collections.EMPTY_MAP);
+                Collection<FieldHolder> fields = iTestFieldProvider.collectFields(o.getClass());
                 if (0 == fields.size() && o.getClass() == expectedType.getRawType()) {
                     out.append("{}");
                 } else {

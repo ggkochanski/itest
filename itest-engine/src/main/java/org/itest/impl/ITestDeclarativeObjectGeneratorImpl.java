@@ -25,13 +25,14 @@
  */
 package org.itest.impl;
 
+import com.google.common.reflect.TypeToken;
 import org.itest.ITestConfig;
 import org.itest.ITestContext;
 import org.itest.annotation.ITestFieldAssignment;
 import org.itest.annotation.ITestFieldClass;
 import org.itest.param.ITestParamState;
-import org.itest.util.reflection.ITestFieldUtil;
-import org.itest.util.reflection.ITestTypeUtil;
+import org.itest.util.reflection.ITestFieldProvider;
+import org.itest.util.reflection.ITestFieldProvider.FieldHolder;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -39,7 +40,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 public class ITestDeclarativeObjectGeneratorImpl extends ITestRandomObjectGeneratorImpl {
@@ -48,72 +48,61 @@ public class ITestDeclarativeObjectGeneratorImpl extends ITestRandomObjectGenera
     }
 
     @Override
-    public <T> T generateRandom(Class<T> clazz, Map<String, Type> itestGenericMap, ITestContext iTestContext) {
+    public <T> T generateRandom(Class<T> clazz, ITestContext iTestContext) {
         if ( null == iTestContext.getCurrentParam() && !clazz.isPrimitive() ) {
             return null;
         }
-        return super.generateRandom(clazz, itestGenericMap, iTestContext);
+        return super.generateRandom(clazz, iTestContext);
     }
 
     @Override
-    protected Object fillCollection(Object o, Type type, Map<String, Type> map, ITestContext iTestContext) {
+    protected Object fillCollection(Object o, TypeToken type, ITestContext iTestContext) {
         if ( null == iTestContext.getCurrentParam() || null == iTestContext.getCurrentParam().getSizeParam() ) {
             return o;
         }
-        return super.fillCollection(o, type, map, iTestContext);
+        return super.fillCollection(o, type, iTestContext);
     }
 
     @Override
-    protected Object fillMap(Object o, Type type, Map<String, Type> map, ITestContext iTestContext) {
+    protected Object fillMap(Object o, TypeToken type, ITestContext iTestContext) {
         if ( null == iTestContext.getCurrentParam() || null == iTestContext.getCurrentParam().getSizeParam() ) {
             return o;
         }
-        return super.fillMap(o, type, map, iTestContext);
+        return super.fillMap(o, type, iTestContext);
     }
 
     @Override
-    protected void fillField(Field f, Object o, Map<String, Type> map, ITestContext iTestContext) {
+    protected void fillField(Type fType, Field f, Object o, ITestContext iTestContext) {
         ITestParamState fITestState = iTestContext.getCurrentParam();
         if ( null == fITestState && !iTestContext.isStaticAssignmentRegistered(o.getClass(), f.getName()) && !f.isAnnotationPresent(ITestFieldAssignment.class)
                 && !f.isAnnotationPresent(ITestFieldClass.class) ) {
             return;
         }
-        super.fillField(f, o, map, iTestContext);
+        super.fillField(fType, f, o, iTestContext);
     }
 
     @Override
-    protected void fillMethod(Method m, Object res, String mSignature, Map<String, Type> map, ITestContext iTestContext, Map<String, Object> methodResults) {
+    protected void fillMethod(Type mType, Method m, Object res, String mSignature, ITestContext iTestContext, Map<String, Object> methodResults) {
         if ( null == iTestContext.getCurrentParam() ) {
             return;
         }
-        super.fillMethod(m, res, mSignature, map, iTestContext, methodResults);
+        super.fillMethod(mType, m, res, mSignature, iTestContext, methodResults);
     }
 
     @Override
-    protected Collection<ITestFieldUtil.FieldHolder> collectFields(Class<?> clazz, Map<String, Type> map, ITestContext iTestContext) {
+    protected Collection<ITestFieldProvider.FieldHolder> collectFields(Type type, ITestContext iTestContext) {
+        Collection<ITestFieldProvider.FieldHolder> res = Collections.EMPTY_LIST;
         ITestParamState iTestParamState = iTestContext.getCurrentParam();
-        Collection<ITestFieldUtil.FieldHolder> res = Collections.EMPTY_LIST;
+
         if ( null != iTestParamState && null != iTestParamState.getNames() ) {
-            res = new ArrayList<ITestFieldUtil.FieldHolder>();
-            List<String> names = new ArrayList<String>(iTestParamState.getNames());
-            if ( 0 == names.size() ) {
-                names.add("");
+            res = new ArrayList<ITestFieldProvider.FieldHolder>();
+            Collection<FieldHolder> allFields = super.collectFields(type, iTestContext);
+            for (FieldHolder fieldHolder : allFields) {
+                if (null != fieldHolder.getField().getAnnotation(ITestFieldClass.class)
+                        || null != iTestParamState.getElement(fieldHolder.getField().getName())) {
+                    res.add(fieldHolder);
+                }
             }
-            for (String name : names) {
-                Class<?> t = clazz;
-                do {
-                    for (Field f : t.getDeclaredFields()) {
-                        if ( null != f.getAnnotation(ITestFieldClass.class) ) {
-                            res.add(new ITestFieldUtil.FieldHolder(f, map));
-                        } else if ( f.getName().equals(name) ) {
-                            res.add(new ITestFieldUtil.FieldHolder(f, map));
-                        }
-                    }
-                    map = ITestTypeUtil.getTypeMap(t, map);
-                } while ((t = t.getSuperclass()) != null);
-            }
-        } else {
-            res = super.collectFields(clazz, map, iTestContext);
         }
         return res;
     }

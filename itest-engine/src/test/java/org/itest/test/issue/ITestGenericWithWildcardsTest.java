@@ -1,7 +1,5 @@
 package org.itest.test.issue;
 
-import java.util.List;
-
 import org.hamcrest.CoreMatchers;
 import org.itest.ITestExecutor;
 import org.itest.annotation.ITest;
@@ -10,6 +8,8 @@ import org.itest.config.ITestConfigImpl;
 import org.itest.executor.ITestExecutorUtil;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.List;
 
 public class ITestGenericWithWildcardsTest {
 
@@ -36,7 +36,8 @@ public class ITestGenericWithWildcardsTest {
         }
 
         @ITests({ @ITest(name = "s7", init = "A:[[{class:org.itest.test.issue.ITestGenericWithWildcardsTest$Issue5Class,i:7}]]", verify = "A:[[{i:7}]]"),
-                @ITest(name = "s8", init = "A:[[{i:7}]]", verify = "A:[[{i:7}]]") })
+                @ITest(name = "s8", init = "A:[[{},{}]]", verify = "A:[[{@class:java.lang.Object}]]")
+        })
         public void shouldWorkWithWildcardSuper(List<? super Issue5SubClass> a) {
 
         }
@@ -48,7 +49,7 @@ public class ITestGenericWithWildcardsTest {
     @Test
     public void issue5Test() {
         ITestExecutor executor = ITestExecutorUtil.buildExecutor(new ITestConfigImpl());
-        Assert.assertThat(executor.performTestsFor(7, Issue5Class.class), CoreMatchers.is(""));
+        Assert.assertThat(executor.performTestsFor(8, Issue5Class.class), CoreMatchers.is(""));
     }
 
 }
