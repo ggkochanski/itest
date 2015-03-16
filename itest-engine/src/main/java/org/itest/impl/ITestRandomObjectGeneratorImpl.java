@@ -134,7 +134,6 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             Object array = Array.newInstance(clazz.getComponentType(), size);
             for (int i = 0; i < size; i++) {
                 iTestContext.enter(array, String.valueOf(i));
-                ITestParamState elementITestState = iTestState == null ? null : iTestState.getElement(String.valueOf(i));
                 Object value = generateRandom((Type) clazz.getComponentType(), iTestContext);
                 Array.set(array, i, value);
                 iTestContext.leave(value);
@@ -212,8 +211,10 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             TypeToken componentType = typeToken.getComponentType();
             Object array = Array.newInstance(componentType.getRawType(), size);
             for (int i = 0; i < size; i++) {
-                ITestParamState elementITestState = iTestState == null ? null : iTestState.getElement(String.valueOf(i));
-                Array.set(array, i, generateRandom(componentType.getType(), iTestContext));
+                iTestContext.enter(array, String.valueOf(i));
+                Object value = generateRandom((Type) clazz.getComponentType(), iTestContext);
+                Array.set(array, i, value);
+                iTestContext.leave(value);
             }
             res = array;
         } else if (null != iTestState && null == iTestState.getNames()) {
