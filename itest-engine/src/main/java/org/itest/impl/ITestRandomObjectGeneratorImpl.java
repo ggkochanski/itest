@@ -199,9 +199,9 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             res = iTestContext.findGeneratedObject(iTestState.getAttribute(ITestConstants.REFERENCE_ATTRIBUTE));
         } else if ( PROXY_CLASS == requestedClass ) {
             res = newDynamicProxy(typeToken, iTestContext);
-        } else if ( Collection.class.isAssignableFrom(clazz) ) {
+        } else if ( Collection.class.isAssignableFrom(clazz) || (null != requestedClass && Collection.class.isAssignableFrom(requestedClass)) ) {
             res = fillCollection(null, typeToken, iTestContext);
-        } else if ( Map.class.isAssignableFrom(clazz) ) {
+        } else if ( Map.class.isAssignableFrom(clazz) || (null != requestedClass && Map.class.isAssignableFrom(requestedClass)) ) {
             res = fillMap(null, typeToken, iTestContext);
         } else if ( null != requestedClass ) {
             res = generateRandom(requestedClass, iTestContext);
