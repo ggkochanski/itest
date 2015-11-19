@@ -44,7 +44,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang.RandomStringUtils;
 import org.itest.ITestConfig;
 import org.itest.ITestConstants;
@@ -63,6 +62,8 @@ import org.itest.param.ITestParamState;
 import org.itest.util.reflection.ITestFieldProvider;
 import org.itest.util.reflection.ITestFieldProvider.FieldHolder;
 import org.itest.util.reflection.ITestTypeTokenProvider;
+
+import com.google.common.reflect.TypeToken;
 
 public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
     private static final int MAX_DEPTH = 20;
@@ -125,6 +126,10 @@ public class ITestRandomObjectGeneratorImpl implements ITestObjectGenerator {
             res = random.nextFloat();
         } else if ( Character.class == clazz || char.class == clazz ) {
             res = RandomStringUtils.random(1).charAt(0);
+        } else if ( Byte.class == clazz || byte.class == clazz ) {
+            byte[] randomByte = new byte[1];
+            random.nextBytes(randomByte);
+            res = randomByte[0];
         } else if ( clazz.isEnum() ) {
             res = clazz.getEnumConstants()[random.nextInt(clazz.getEnumConstants().length)];
         } else if ( clazz.isArray() ) {

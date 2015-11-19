@@ -72,7 +72,7 @@ public class ITestExecutorTest {
     }
 
     void performTests(ITestExecutor executor) {
-        Assert.assertEquals("", executor.performTestsFor(81, SimpleExample.class, InterfaceExample.class, ReuseTestDataExample.class, CollectionsExample.class,
+        Assert.assertEquals("", executor.performTestsFor(84, SimpleExample.class, InterfaceExample.class, ReuseTestDataExample.class, CollectionsExample.class,
                 DataProviderExample.class, ExternalTestDefinition.class, ReferenceExample.class, ValueClassExample.class, LazyLoadedDefinitionExample.class,
                 ITestSuperObjectExample.class, ITestParamStateExample.class, ITestJsonEscapeTest.class));
     }
