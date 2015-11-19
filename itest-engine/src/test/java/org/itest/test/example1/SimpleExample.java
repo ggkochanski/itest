@@ -25,15 +25,15 @@
  */
 package org.itest.test.example1;
 
-import org.itest.annotation.ITest;
-import org.itest.annotation.ITestRef;
-import org.itest.annotation.ITests;
-import org.junit.Assert;
-
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
+
+import org.itest.annotation.ITest;
+import org.itest.annotation.ITestRef;
+import org.itest.annotation.ITests;
+import org.junit.Assert;
 
 public class SimpleExample {
     @ITests(@ITest(init = "A:[3,16]", verify = "R:19"))
@@ -97,5 +97,8 @@ public class SimpleExample {
     @ITests(@ITest(init="A:[{value:[a,b,c],offset:0,count:3}]",verify = "R:abc"))
     public String setString(String s){
         return s;
+    }
+    @ITests(@ITest(init="A:[[1,2,3]]",verify = "A:[[1,2,3]]"))
+    public void byteArray(byte[] bytes){
     }
 }

@@ -25,15 +25,15 @@
  */
 package org.itest.impl;
 
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.Date;
+
 import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.itest.exception.ITestException;
 import org.itest.exception.ITestInitializationException;
 import org.itest.param.ITestValueConverter;
-
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.util.Date;
 
 public class ITestValueConverterImpl implements ITestValueConverter {
 
@@ -54,6 +54,8 @@ public class ITestValueConverterImpl implements ITestValueConverter {
             res = Float.valueOf(value);
         } else if ( Boolean.class == clazz || boolean.class == clazz ) {
             res = Boolean.valueOf(value);
+        } else if ( Byte.class == clazz || byte.class == clazz ) {
+            res = Byte.valueOf(value);
         } else if ( Character.class == clazz || char.class == clazz ) {
             value = StringEscapeUtils.unescapeJava(value);
             if ( value.length() > 1 ) {
